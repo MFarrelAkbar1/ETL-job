@@ -1,0 +1,121 @@
+# https://taskfile.dev  (jalan di Windows, WSL2, dan Linux)
+# Argumen tambahan diteruskan setelah "--", contoh: task test-sql -- -k s07
+version: "3"
+
+env:
+  PYTHONIOENCODING: utf-8
+  PYTHONUTF8: "1"
+
+vars:
+  PY: '{{if eq OS "windows"}}.venv/Scripts/python.exe{{else}}.venv/bin/python{{end}}'
+  BOOT_PY: '{{if eq OS "windows"}}py -3.12{{else}}python3.12{{end}}'
+
+tasks:
+  default:
+    desc: Daftar perintah
+    cmds:
+      - task --list
+
+  setup:
+    desc: Buat virtualenv, install dependency, bangkitkan dataset, siapkan file soal
+    cmds:
+      - '{{.BOOT_PY}} -m venv .venv'
+      - '{{.PY}} -m pip install --upgrade pip -q'
+      - '{{.PY}} -m pip install -r requirements.txt -q'
+      - '{{.PY}} data/generate.py'
+      - '{{.PY}} tools/render_exercises.py'
+      - '{{.PY}} tools/check_java.py'
+
+  data:
+    desc: Bangkitkan ulang dataset saja (seed tetap, hasil selalu sama)
+    cmds:
+      - '{{.PY}} data/generate.py'
+
+  test-sql:
+    desc: Nilai jawaban Modul 1 (SQL)
+    cmds:
+      - '{{.PY}} -m pytest tests/m1_sql {{.CLI_ARGS}}'
+
+  test-python:
+    desc: Nilai jawaban Modul 2 (Python dan pandas)
+    cmds:
+      - '{{.PY}} -m pytest tests/m2_python {{.CLI_ARGS}}'
+
+  test-modeling:
+    desc: Nilai latihan grain/fact/dimension Modul 3
+    cmds:
+      - '{{.PY}} -m pytest tests/m3_modeling {{.CLI_ARGS}}'
+
+  test-quality:
+    desc: Nilai jawaban Modul 4 (data quality)
+    cmds:
+      - '{{.PY}} -m pytest tests/m4_quality {{.CLI_ARGS}}'
+
+  test-iceberg:
+    desc: Nilai jawaban Modul 6 (Iceberg)
+    cmds:
+      - '{{.PY}} -m pytest tests/m6_iceberg {{.CLI_ARGS}}'
+
+  iceberg-demo:
+    desc: Buat tabel Iceberg contoh di exercises/m6_iceberg/playground dan tampilkan metadata-nya
+    cmds:
+      - '{{.PY}} tools/iceberg_demo.py'
+
+  test-airflow:
+    desc: Nilai jawaban Modul 8 (struktur DAG Airflow, lewat AST)
+    cmds:
+      - '{{.PY}} -m pytest tests/m8_airflow {{.CLI_ARGS}}'
+
+  test-all:
+    desc: Nilai semua modul
+    cmds:
+      - '{{.PY}} -m pytest {{.CLI_ARGS}}'
+
+  verify:
+    desc: (Untuk pembuat soal) jalankan semua test dengan kunci jawaban di solutions/
+    cmds:
+      - '{{.PY}} -m pytest --answers=solutions {{.CLI_ARGS}}'
+
+  progress:
+    desc: Tampilkan berapa soal yang sudah lulus per modul
+    cmds:
+      - '{{.PY}} tools/progress.py {{.CLI_ARGS}}'
+
+  hint:
+    desc: "Petunjuk bertahap 3 level. Contoh: task hint -- s07"
+    cmds:
+      - '{{.PY}} tools/hint.py {{.CLI_ARGS}}'
+
+  timed:
+    desc: "Mode live test: 5 soal SQL acak, 15 menit. Opsi: task timed -- --priority"
+    interactive: true
+    cmds:
+      - '{{.PY}} tools/timed.py {{.CLI_ARGS}}'
+
+  reset:
+    desc: "Kosongkan ulang file latihan. Contoh: task reset -- s07 | p03 | g | k02 | dq03 | ice03 | dag02 | all"
+    interactive: true
+    cmds:
+      - '{{.PY}} tools/reset.py {{.CLI_ARGS}}'
+
+  dbt-setup:
+    desc: (Opsional, Modul 4) install dbt-duckdb di virtualenv terpisah .venv-dbt
+    vars:
+      DBT_PY: '{{if eq OS "windows"}}.venv-dbt/Scripts/python.exe{{else}}.venv-dbt/bin/python{{end}}'
+    cmds:
+      - '{{.BOOT_PY}} -m venv .venv-dbt'
+      - '{{.DBT_PY}} -m pip install -q --upgrade pip'
+      - '{{.DBT_PY}} -m pip install -q -r requirements-dbt.txt'
+
+  dbt-build:
+    desc: (Opsional, Modul 4) jalankan model dan test dbt di dbt_example/
+    dir: dbt_example
+    vars:
+      DBT: '{{if eq OS "windows"}}../.venv-dbt/Scripts/dbt.exe{{else}}../.venv-dbt/bin/dbt{{end}}'
+    cmds:
+      - '{{.DBT}} build --profiles-dir . {{.CLI_ARGS}}'
+
+  quiz:
+    desc: Buka kuis konsep (HTML mandiri) di browser
+    cmds:
+      - '{{.PY}} -c "import pathlib,webbrowser,sys; p=pathlib.Path(''quiz/quiz.html''); webbrowser.open(p.resolve().as_uri())"'

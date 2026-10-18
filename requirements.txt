@@ -1,0 +1,9 @@
+# Python 3.12
+duckdb>=1.4.0,<2
+pandas>=2.2,<3
+numpy>=1.26
+pyarrow>=17
+pytest>=8
+pyyaml>=6
+sqlglot>=25
+pyiceberg[sql-sqlite,pyarrow,pyiceberg-core]>=0.9

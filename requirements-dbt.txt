@@ -1,0 +1,2 @@
+# Opsional, Modul 4 bonus. Dipasang di .venv-dbt terpisah (task dbt-setup).
+dbt-duckdb>=1.8,<2
