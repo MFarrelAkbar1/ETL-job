@@ -1,0 +1,13 @@
+# Profile lokal: database hasil dbt ada di dbt_example/dbt.duckdb,
+# warehouse latihan di-attach read-only sebagai "wh" supaya tidak pernah ikut berubah.
+de_prep:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: dbt.duckdb
+      threads: 4
+      attach:
+        - path: ../data/warehouse.duckdb
+          alias: wh
+          read_only: true
