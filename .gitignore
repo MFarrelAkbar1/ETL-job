@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.progress/
+data/raw/
+data/parquet/
+data/warehouse.duckdb
+data/*.wal
+exercises/timed/
+.venv-dbt/
+dbt_example/target/
+dbt_example/logs/
+dbt_example/dbt.duckdb
+exercises/m6_iceberg/playground/
