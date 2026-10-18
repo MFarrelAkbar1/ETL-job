@@ -1,0 +1,49 @@
+# Petunjuk bertahap Modul 2.
+p01:
+  - Lihat parameter pd.read_csv yang mengatur tipe kolom dan nilai NA.
+  - dtype=str mencegah tebakan tipe. pandas punya daftar NA bawaan yang cukup panjang ('None', 'nan', ...).
+  - Gabungkan keep_default_na=False dengan na_values=NULL_MARKERS. Path(path).name memberi nama file saja.
+p02:
+  - Gunakan method .str dari pandas, bukan loop.
+  - .str.replace(r"\s+", "", regex=True) membuang semua whitespace. Hati-hati, astype(str) mengubah NaN menjadi 'nan'.
+  - Untuk status, bersihkan dulu (strip + lower), lalu .map(dict) dan .fillna("UNKNOWN").
+p03:
+  - Satu panggilan pd.to_datetime tidak bisa menangani tiga format secara eksplisit.
+  - pd.to_datetime(s, format=..., errors="coerce") untuk tiap format, lalu gabungkan.
+  - Mulai dari Series NaT, lalu .fillna() dengan hasil parse format berikutnya. detect_format bisa memakai datetime.strptime dalam try/except.
+p04:
+  - Waktu dalam bentuk teks tidak bisa dibandingkan dengan benar. Buat kolom bantu bertipe datetime.
+  - sort_values lalu drop_duplicates(subset=key, keep="last"). Sort yang stabil (kind="stable") menjaga urutan asli untuk nilai seri.
+  - Hapus kolom bantu sebelum return, urutkan berdasarkan key, reset_index(drop=True). value_counts membantu untuk report.
+p05:
+  - pd.to_numeric(..., errors="coerce") mengubah teks yang bukan angka menjadi NaN.
+  - Buat daftar kondisi boolean sesuai urutan aturan. np.select memilih kondisi pertama yang True.
+  - Setelah dipisah, ubah quantity valid ke int64. Jangan lupa reset_index untuk kedua hasil.
+p06:
+  - Merge bisa menggandakan baris kalau sisi kanan punya key duplikat. Cek dulu.
+  - Parameter validate="many_to_one" di merge, dan how="left" supaya item tak dikenal tetap ada.
+  - Isi segment/category yang kosong dengan fillna("UNKNOWN"). Untuk attach_orders, jumlah terbuang = len(items) - len(hasil).
+p07:
+  - Filter status dulu, baru groupby.
+  - Named aggregation, contoh agg(revenue=("line_amount", "sum"), n_orders=("order_id", "nunique")).
+  - Untuk top N, sort_values dengan kind="stable", lalu groupby(...).head(n), dan cumcount() + 1 untuk rank.
+p08:
+  - pd.date_range(start, end, freq="D") memberi semua tanggal.
+  - Accessor .dt punya year, quarter, month, day, dayofweek (0 = Senin), is_month_end, isocalendar().
+  - Nama hari/bulan ambil dari list DAYS_ID dan MONTHS_ID memakai indeks, bukan strftime.
+p09:
+  - pyarrow.parquet.write_to_dataset mendukung partition_cols.
+  - Parameter existing_data_behavior punya pilihan "delete_matching" dan "overwrite_or_ignore".
+  - Untuk append, beri basename_template yang unik (misalnya memakai uuid) supaya file lama tidak tertimpa.
+p10:
+  - logging.getLogger(name) selalu mengembalikan objek yang sama untuk nama yang sama, termasuk handler yang sudah terpasang.
+  - Cek apakah logger sudah punya handler sebelum menambahkan. Untuk retry, loop range(1, total + 1) dengan try/except.
+  - Tangkap TransientError dan Exception di dua except terpisah. Pakai "raise" tanpa argumen untuk raise ulang exception asli.
+p11:
+  - con.register("nama", df) membuat DataFrame bisa diquery seperti tabel di DuckDB.
+  - CREATE TABLE ... AS SELECT * FROM src LIMIT 0 membuat tabel kosong dengan skema yang sama.
+  - Upsert = DELETE baris dengan key yang ada di batch, lalu INSERT, di dalam BEGIN/COMMIT. ROLLBACK di except.
+p12:
+  - Tulis langkahnya sebagai fungsi kecil, extract, clean orders, dimensi, klasifikasi item, fakta, load. Import fungsi dari P01 sampai P08.
+  - Klasifikasi reject memakai np.select seperti P05, dengan kondisi tambahan di depan (order_rejected) dan di belakang (unknown_product).
+  - Surrogate key dari np.arange(1, n + 1) setelah diurutkan. distributor_key NULL setelah merge diisi -1. Gunakan CREATE OR REPLACE TABLE supaya idempotent.

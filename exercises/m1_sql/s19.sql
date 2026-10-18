@@ -1,0 +1,24 @@
+-- ==========================================================================
+-- S19 | Rekonsiliasi jumlah baris dan total
+-- Tingkat: SULIT | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Tim finance curiga data warehouse tidak sama dengan staging. Bandingkan stg_sales dan
+--   dwh_sales per order_date. Tanggal yang hanya ada di salah satu sisi tetap harus tampil,
+--   dengan jumlah baris dan amount sisi yang kosong = 0.
+--   row_diff = tgt_rows - src_rows, amount_diff = tgt_amount - src_amount.
+--   status = 'OK' kalau row_diff = 0 dan amount_diff = 0, selain itu 'MISMATCH'.
+--
+-- Tabel        : stg_sales (sumber), dwh_sales (target)
+-- Kolom output : order_date, src_rows, tgt_rows, src_amount, tgt_amount, row_diff, amount_diff, status (amount 2 desimal)
+-- Urutan baris : order_date ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s19
+-- Petunjuk     : task hint -- s19   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

@@ -1,0 +1,24 @@
+-- ==========================================================================
+-- S09 | CTE bertingkat: revenue bersih
+-- Tingkat: SEDANG | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Hitung revenue bersih per region untuk order tahun 2025 (berdasarkan order_date order
+--   aslinya, bukan return_date). gross_revenue memakai definisi standar. refund_amount = total
+--   returns.refund_amount untuk order COMPLETED tahun 2025 tersebut. net_revenue = gross - refund.
+--   return_rate_pct = refund / gross * 100. Region diambil dari distributors (order orphan
+--   dan NULL diabaikan). Hati-hati dengan fan-out saat JOIN dua tabel detail sekaligus.
+--
+-- Tabel        : orders_clean, order_items_clean, returns, distributors, regions
+-- Kolom output : region_id, region_name, gross_revenue, refund_amount, net_revenue, return_rate_pct (semua angka dibulatkan 2 desimal)
+-- Urutan baris : net_revenue DESC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s09
+-- Petunjuk     : task hint -- s09   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S16 | Running total
+-- Tingkat: SEDANG | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Hitung revenue harian per region (region dari distributors, order orphan dan NULL
+--   diabaikan) untuk 2024 dan 2025, lalu running total (kumulatif) per region yang
+--   RESET setiap awal tahun. Hanya tanggal yang punya penjualan yang ditampilkan.
+--
+-- Tabel        : orders_clean, order_items_clean, distributors
+-- Kolom output : region_id, order_date, daily_revenue, running_revenue (2 desimal)
+-- Urutan baris : region_id ASC, order_date ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s16
+-- Petunjuk     : task hint -- s16   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

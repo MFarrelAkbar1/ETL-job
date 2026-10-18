@@ -1,0 +1,701 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuis Data Engineer</title>
+<style>
+:root {
+  --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #5d6677; --line: #dde1e8;
+  --accent: #2f5bd3; --accent-soft: #e6ecfb; --ok: #1f7a4a; --ok-soft: #e3f4ea;
+  --bad: #b3261e; --bad-soft: #fbe7e5; --shadow: 0 1px 3px rgba(20,30,50,.08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #12151b; --card: #1b2029; --text: #e6e9ef; --muted: #9aa3b2; --line: #2c3340;
+    --accent: #7c9cf0; --accent-soft: #232c42; --ok: #5cc48a; --ok-soft: #1b3326;
+    --bad: #f08a80; --bad-soft: #3a2220; --shadow: none;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #12151b; --card: #1b2029; --text: #e6e9ef; --muted: #9aa3b2; --line: #2c3340;
+  --accent: #7c9cf0; --accent-soft: #232c42; --ok: #5cc48a; --ok-soft: #1b3326;
+  --bad: #f08a80; --bad-soft: #3a2220; --shadow: none;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+.wrap { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h1 { font-size: 1.25rem; margin: 0; }
+nav { display: flex; gap: 6px; }
+nav button, .btn { border: 1px solid var(--line); background: var(--card); color: var(--text);
+  padding: 8px 14px; border-radius: 8px; font: inherit; cursor: pointer; }
+nav button[aria-pressed="true"], .btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn:disabled { opacity: .45; cursor: default; }
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 20px;
+  margin-top: 16px; box-shadow: var(--shadow); }
+.muted { color: var(--muted); font-size: .92rem; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 4px; }
+.chip { border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; cursor: pointer;
+  background: var(--card); color: var(--text); font: inherit; font-size: .9rem; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-top: 14px; }
+select { font: inherit; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line);
+  background: var(--card); color: var(--text); }
+.bar { height: 6px; background: var(--line); border-radius: 99px; overflow: hidden; margin: 6px 0 14px; }
+.bar > i { display: block; height: 100%; background: var(--accent); width: 0; transition: width .2s; }
+.badge { display: inline-block; font-size: .78rem; padding: 2px 10px; border-radius: 999px;
+  background: var(--accent-soft); color: var(--accent); }
+.q { font-size: 1.08rem; font-weight: 600; margin: 10px 0 14px; }
+.opts { display: grid; gap: 8px; }
+.opt { text-align: left; border: 1px solid var(--line); background: var(--card); color: var(--text);
+  border-radius: 10px; padding: 11px 14px; font: inherit; cursor: pointer; display: flex; gap: 10px; }
+.opt:hover:not(:disabled) { border-color: var(--accent); }
+.opt .k { color: var(--muted); font-variant-numeric: tabular-nums; min-width: 1.2em; }
+.opt.ok { background: var(--ok-soft); border-color: var(--ok); }
+.opt.bad { background: var(--bad-soft); border-color: var(--bad); }
+.opt:disabled { cursor: default; }
+.explain { margin-top: 14px; padding: 12px 14px; border-left: 3px solid var(--accent);
+  background: var(--accent-soft); border-radius: 6px; }
+.explain b.ok { color: var(--ok); } .explain b.bad { color: var(--bad); }
+.score { font-size: 2.2rem; font-weight: 700; }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th, td { text-align: left; padding: 7px 6px; border-bottom: 1px solid var(--line); }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+.flash { min-height: 220px; display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center; cursor: pointer; user-select: none; }
+.flash .term { font-size: 1.4rem; font-weight: 700; }
+.flash .def { margin-top: 14px; max-width: 560px; }
+.wrong-list li { margin-bottom: 10px; }
+.hidden { display: none; }
+footer { margin-top: 28px; }
+@media (max-width: 520px) { .score { font-size: 1.8rem; } .card { padding: 16px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Kuis Konsep Data Engineer</h1>
+    <nav>
+      <button data-view="quiz" aria-pressed="true">Kuis</button>
+      <button data-view="flash" aria-pressed="false">Flashcard</button>
+      <button data-view="stats" aria-pressed="false">Statistik</button>
+    </nav>
+  </header>
+
+  <!-- ====== KUIS: pengaturan ====== -->
+  <section id="v-quiz">
+    <div class="card" id="setup">
+      <div><b>Pilih topik</b> <span class="muted">(kosongkan semua = semua topik)</span></div>
+      <div class="chips" id="topicChips"></div>
+      <div class="row">
+        <label>Jumlah soal
+          <select id="count">
+            <option value="10">10</option><option value="20" selected>20</option>
+            <option value="40">40</option><option value="all">Semua</option>
+          </select>
+        </label>
+        <button class="btn primary" id="startBtn">Mulai</button>
+        <button class="btn" id="retryWrongBtn">Ulangi soal yang pernah salah</button>
+      </div>
+      <p class="muted" id="bankInfo"></p>
+      <p class="muted">Pintasan: tekan 1 sampai 4 untuk menjawab, Enter untuk lanjut.</p>
+    </div>
+
+    <div class="card hidden" id="play">
+      <div class="row" style="justify-content:space-between;margin-top:0">
+        <span class="badge" id="qTopic"></span>
+        <span class="muted" id="qPos"></span>
+      </div>
+      <div class="bar"><i id="qBar"></i></div>
+      <div class="q" id="qText"></div>
+      <div class="opts" id="qOpts"></div>
+      <div id="qExplain"></div>
+      <div class="row">
+        <button class="btn primary" id="nextBtn" disabled>Lanjut</button>
+        <button class="btn" id="quitBtn">Akhiri</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="result"></div>
+  </section>
+
+  <!-- ====== FLASHCARD ====== -->
+  <section id="v-flash" class="hidden">
+    <div class="card">
+      <div class="row" style="justify-content:space-between;margin-top:0">
+        <span class="muted" id="fPos"></span>
+        <button class="btn" id="fShuffle">Acak ulang</button>
+      </div>
+      <div class="flash" id="fCard" tabindex="0" role="button" aria-label="Balik kartu"></div>
+      <div class="row" style="justify-content:center">
+        <button class="btn" id="fPrev">Sebelumnya</button>
+        <button class="btn primary" id="fFlip">Balik</button>
+        <button class="btn" id="fNext">Berikutnya</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== STATISTIK ====== -->
+  <section id="v-stats" class="hidden">
+    <div class="card" id="statsBody"></div>
+  </section>
+
+  <footer class="muted">
+    File mandiri, tanpa server dan tanpa internet. Skor tersimpan di localStorage browser ini.
+    Catatan: kunci jawaban tersimpan di source file ini. Jangan buka source sebelum mengerjakan.
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+/* Bank soal. Format: [topik, pertanyaan, [opsi BENAR, opsi salah, ...], penjelasan].
+   Opsi selalu diacak saat ditampilkan, dan tidak ada penanda jawaban di DOM sebelum menjawab. */
+const TOPICS = {
+  snowflake: "Snowflake", databricks: "Databricks", lakeformat: "Delta Lake vs Iceberg",
+  polaris: "Polaris Catalog", ranger: "Apache Ranger", akses: "RBAC, masking, RLS",
+  uupdp: "UU PDP No. 27/2022", airflow: "Airflow", streaming: "Batch vs streaming",
+  cdc: "CDC", idempotency: "Idempotency", medallion: "Medallion architecture"
+};
+
+const BANK = [
+  // ---------------- Snowflake ----------------
+  ["snowflake", "Tiga lapisan arsitektur Snowflake adalah...",
+    ["Storage, compute (virtual warehouse), cloud services","Storage, compute (Spark cluster), dan metastore Hive","Ingestion (Snowpipe), compute (warehouse), serving (BI)","Raw stage, transform warehouse, dan presentation layer"],
+    "Storage dan compute dipisah sehingga bisa diskalakan sendiri-sendiri. Lapisan cloud services menangani metadata, optimizer, autentikasi, dan kontrol akses."],
+  ["snowflake", "Puluhan analis menjalankan query ringan bersamaan sehingga query mengantre (queuing). Solusi paling tepat?",
+    ["Multi-cluster warehouse untuk scale out","Scale up warehouse dari M ke XL","Menambah clustering key di tabel","Query acceleration untuk query kecil"],
+    "Scale out (menambah cluster) menyelesaikan masalah concurrency. Scale up (warehouse lebih besar) mempercepat satu query berat, tetapi tidak banyak membantu antrean banyak query kecil."],
+  ["snowflake", "Pernyataan yang benar tentang Time Travel dan Fail-safe?",
+    ["Time Travel bisa dipakai user (1 sampai 90 hari); Fail-safe 7 hari hanya bisa dipulihkan Snowflake","Time Travel dan Fail-safe sama-sama bisa di-query user memakai AT(OFFSET => ...) selama 7 hari","Fail-safe bisa di-query user selama 90 hari; Time Travel hanya dipakai internal Snowflake untuk recovery","Time Travel hanya ada di tabel transient; tabel permanen hanya dilindungi Fail-safe selama 1 hari"],
+    "Time Travel dipakai lewat AT/BEFORE dan UNDROP. Fail-safe adalah jaring pengaman terakhir untuk tabel permanen, tidak bisa di-query user. Tabel transient dan temporary tidak punya Fail-safe."],
+  ["snowflake", "Apa yang terjadi saat Anda menjalankan CREATE TABLE dev_sales CLONE prod_sales?",
+    ["Salinan berbasis metadata yang berbagi micro-partition; storage hanya untuk perubahan","Salinan fisik penuh yang dibuat di background, tabel bisa dipakai setelah penyalinan selesai","Salinan read-only yang otomatis ikut berubah setiap kali tabel sumber di-update","View yang menunjuk ke tabel sumber dan ikut hilang kalau tabel sumber di-drop"],
+    "Zero-copy clone sangat berguna untuk membuat environment dev/test dari data produksi tanpa biaya storage di awal."],
+  ["snowflake", "Fitur Snowflake untuk menangkap perubahan baris (insert, update, delete) pada sebuah tabel supaya bisa diproses secara incremental adalah...",
+    ["Stream","Snowpipe","Dynamic stage","Sequence"],
+    "Stream menyimpan offset perubahan sejak terakhir dikonsumsi, biasanya diproses oleh Task terjadwal. Snowpipe untuk memuat file secara kontinu dari stage."],
+  ["snowflake", "Query yang sama persis dijalankan ulang 10 menit kemudian dan data tabel tidak berubah. Apa yang terjadi?",
+    ["Hasil diambil dari result cache tanpa memakai compute warehouse","Warehouse menghitung ulang dari local disk cache","Hasil diambil dari Time Travel lalu dihitung ulang","Query dijalankan ulang penuh karena hasil tidak pernah disimpan"],
+    "Result cache ada di lapisan cloud services dan berlaku 24 jam selama data tidak berubah. Selain itu ada local disk cache di warehouse yang menyimpan data micro-partition yang baru dibaca."],
+  ["snowflake", "Bagaimana Snowflake mempercepat query dengan filter tanggal pada tabel sangat besar tanpa index?",
+    ["Pruning memakai metadata min/max setiap micro-partition","B-tree index otomatis di kolom tanggal","Hash partition per tanggal yang wajib didefinisikan oleh user","Materialized view otomatis untuk filter yang sering dipakai"],
+    "Setiap micro-partition (sekitar 50 sampai 500 MB data sebelum kompresi) punya statistik per kolom. Clustering key membantu kalau urutan data alami tidak cocok dengan pola filter."],
+  ["snowflake", "Parameter warehouse yang mematikan warehouse otomatis ketika idle supaya tidak terus memakan credit adalah...",
+    ["AUTO_SUSPEND","AUTO_CLUSTER","IDLE_TIMEOUT_MINS","STATEMENT_TIMEOUT_IN_SECONDS"],
+    "Kombinasikan AUTO_SUSPEND dengan AUTO_RESUME. Billing warehouse dihitung per detik dengan minimum 60 detik setiap kali warehouse menyala."],
+  // ---------------- Databricks ----------------
+  ["databricks", "Namespace tiga level di Unity Catalog adalah...",
+    ["catalog.schema.table","database.table","workspace.schema.table","metastore.database.table"],
+    "Unity Catalog memusatkan governance (izin, lineage, audit) lintas workspace. Hive metastore lama hanya punya dua level: database.table."],
+  ["databricks", "Fitur Databricks untuk meng-ingest file baru yang terus berdatangan di cloud storage secara incremental, sambil mencatat file mana yang sudah diproses, adalah...",
+    ["Auto Loader (format cloudFiles)","Structured Streaming dengan format text","COPY INTO yang dijadwalkan setiap menit","Delta Sharing dengan change data feed"],
+    "Auto Loader menyimpan status file di checkpoint, mendukung schema inference dan schema evolution, sehingga tidak perlu listing seluruh folder setiap kali."],
+  ["databricks", "Photon di Databricks adalah...",
+    ["Engine eksekusi vektorisasi (C++) untuk SQL dan DataFrame","Format kolumnar pengganti Parquet di tabel Delta","Optimizer berbasis cost pengganti Catalyst di Spark","Layer caching SSD yang menyimpan hasil query untuk dipakai ulang"],
+    "Photon kompatibel dengan API Spark, jadi kode tidak perlu diubah. Biayanya berbeda, jadi pilih untuk workload yang memang diuntungkan."],
+  ["databricks", "Pipeline produksi terjadwal sebaiknya dijalankan di...",
+    ["Job compute yang dibuat saat job mulai dan dimatikan setelah selesai","All-purpose cluster bersama yang selalu menyala untuk semua tim data","SQL warehouse serverless untuk semua job Python dan Scala","Cluster interaktif milik developer yang membuat pipeline tersebut"],
+    "Job compute lebih murah per DBU, terisolasi dari eksperimen orang lain, dan konfigurasinya tercatat bersama job sehingga reproducible."],
+  ["databricks", "Tabel Delta punya ribuan file kecil dan query sering memfilter distributor_id. Perintah yang paling tepat adalah...",
+    ["OPTIMIZE nama_tabel ZORDER BY (distributor_id)","VACUUM nama_tabel RETAIN 0 HOURS","ANALYZE TABLE nama_tabel COMPUTE STATISTICS FOR ALL COLUMNS","ALTER TABLE nama_tabel PARTITIONED BY (distributor_id)"],
+    "OPTIMIZE menggabungkan file kecil (compaction), ZORDER mengelompokkan data yang mirip supaya data skipping efektif. Di versi baru, liquid clustering adalah alternatifnya. VACUUM dengan retensi 0 jam berbahaya karena bisa merusak pembaca yang sedang berjalan dan menghapus time travel."],
+  ["databricks", "Fungsi perintah VACUUM pada tabel Delta adalah...",
+    ["Menghapus file yang tidak lagi direferensikan, setelah lewat periode retensi","Menggabungkan file-file kecil menjadi file besar","Menghapus entri lama di _delta_log sehingga riwayat hanya 7 hari","Menghapus baris yang ditandai deleted lalu menulis ulang semua file tabel"],
+    "Setelah VACUUM, time travel ke versi yang file-nya sudah dihapus tidak bisa lagi. Itu sebabnya retensi default dibuat 7 hari."],
+  ["databricks", "Di Delta Live Tables (sekarang bagian dari Lakeflow Declarative Pipelines), aturan seperti CONSTRAINT valid_price EXPECT (price > 0) ON VIOLATION DROP ROW disebut...",
+    ["Expectation","Constraint check","Assertion","Data contract"],
+    "Expectation bisa hanya mencatat pelanggaran, membuang baris (DROP ROW), atau menggagalkan update (FAIL UPDATE). Metrik pelanggaran tercatat di event log pipeline."],
+  // ---------------- Delta Lake vs Iceberg ----------------
+  ["lakeformat", "Di mana Delta Lake menyimpan riwayat transaksinya?",
+    ["Folder _delta_log: JSON per commit plus checkpoint Parquet","Hive metastore yang mencatat daftar file Parquet per partisi tabel","File manifest Avro yang menunjuk snapshot dan data file tabel","File metadata.json tunggal yang ditimpa setiap kali ada commit"],
+    "Pembaca membangun state tabel dari checkpoint terakhir ditambah file JSON sesudahnya. Commit atomik dijamin oleh penulisan file log baru."],
+  ["lakeformat", "Urutan struktur metadata Apache Iceberg dari atas ke bawah adalah...",
+    ["Catalog, metadata.json, manifest list, manifest file, data file","Catalog, manifest file, metadata.json, manifest list, data file","metadata.json, catalog, manifest file, manifest list, data file","Catalog, manifest list, metadata.json, data file, manifest file"],
+    "metadata.json menyimpan skema, partition spec, dan daftar snapshot. Setiap snapshot punya satu manifest list. Manifest file mencatat data file beserta statistik kolomnya."],
+  ["lakeformat", "Keunggulan hidden partitioning di Iceberg adalah...",
+    ["User cukup memfilter kolom asli; transform partisi diterapkan otomatis oleh Iceberg","Kolom partisi disimpan di folder tersembunyi sehingga user harus memfilter kolom order_date_str","Partisi ditentukan engine dari statistik query","Partisi disembunyikan dari catalog, hanya Spark yang bisa membaca"],
+    "Di Hive-style partitioning, user harus tahu dan memfilter kolom partisi turunan (misalnya order_date_str), kalau tidak, pruning tidak terjadi."],
+  ["lakeformat", "Tabel Iceberg dipartisi per bulan, lalu partition spec diubah menjadi per hari. Apa yang terjadi?",
+    ["Data baru memakai spec baru, data lama tetap memakai spec lama","Seluruh data lama ditulis ulang di background mengikuti spec harian yang baru","Data lama tetap ada tetapi tidak bisa dibaca sampai dilakukan migrasi manual","Perubahan ditolak karena partition spec Iceberg tidak bisa diubah setelah tabel dibuat"],
+    "Ini disebut partition evolution. Perencana query memakai spec yang sesuai untuk setiap file."],
+  ["lakeformat", "Pernyataan yang benar tentang time travel?",
+    ["Keduanya bisa, selama file lama belum dihapus VACUUM atau expire snapshots","Hanya Delta; Iceberg hanya menyimpan snapshot terbaru","Hanya Iceberg; Delta harus memakai backup storage","Keduanya menyimpan salinan penuh tabel di setiap commit sehingga time travel tidak terbatas"],
+    "Delta: VERSION AS OF / TIMESTAMP AS OF. Iceberg: snapshot id atau timestamp. Keduanya menyimpan file yang berubah saja, bukan salinan penuh."],
+  ["lakeformat", "Di Iceberg format v2, cara menghapus baris tanpa menulis ulang file data adalah...",
+    ["Delete file (position/equality delete), diterapkan saat baca","Copy-on-write yang menulis ulang setiap file data yang berisi baris terhapus","Flag deleted di manifest list yang dibaca engine saat melakukan scan","Baris dihapus langsung di dalam file Parquet secara in-place oleh writer"],
+    "Merge-on-read membuat penulisan cepat, tetapi pembacaan lebih berat sampai dilakukan compaction. Copy-on-write sebaliknya."],
+  ["lakeformat", "Delta UniForm berfungsi untuk...",
+    ["Membuat metadata Iceberg (dan Hudi) untuk tabel Delta yang sama","Mengonversi Delta ke Iceberg lalu menghapus _delta_log","Menyalin data Delta ke tabel Iceberg terpisah setiap kali ada commit baru","Menyeragamkan skema semua tabel Delta di catalog"],
+    "Data file Parquet tetap satu salinan, hanya metadata-nya yang dibuat dalam beberapa format."],
+  ["lakeformat", "Kenapa tabel Iceberg membutuhkan catalog?",
+    ["Catalog menyimpan pointer metadata terkini dan menukarnya atomik saat commit","Catalog menyimpan salinan data file sehingga engine tidak perlu mengakses object storage","Catalog menjadwalkan compaction dan expire snapshot secara otomatis untuk setiap tabel","Catalog hanya menyimpan deskripsi tabel untuk dokumentasi dan pencarian data"],
+    "Contoh catalog: Hive metastore, AWS Glue, Nessie, JDBC/SQL catalog, dan REST catalog seperti Apache Polaris."],
+  // ---------------- Polaris Catalog ----------------
+  ["polaris", "Apache Polaris adalah...",
+    ["Iceberg REST catalog open-source, berasal dari Snowflake, kini di Apache","Format tabel buatan Snowflake, alternatif Delta dan Iceberg","Engine query open-source buatan Databricks untuk membaca tabel Iceberg di Unity Catalog","Hive metastore berbasis cloud yang dikelola AWS Glue"],
+    "Polaris mengikuti spesifikasi Iceberg REST catalog, jadi engine apa pun yang mendukung REST catalog bisa terhubung."],
+  ["polaris", "Manfaat utama memakai REST catalog seperti Polaris adalah...",
+    ["Banyak engine memakai tabel Iceberg yang sama dengan satu catalog dan satu aturan akses","Data otomatis direplikasi ke storage milik setiap engine supaya query lebih cepat","Engine tidak perlu lagi object storage karena data disimpan di dalam catalog","Satu engine utama mengeksekusi query atas nama semua engine lain yang terhubung"],
+    "Inilah ide arsitektur lakehouse terbuka: satu salinan data, banyak engine, governance terpusat di catalog."],
+  ["polaris", "Fitur credential vending di Polaris adalah...",
+    ["Engine diberi kredensial storage sementara yang dibatasi ke lokasi tabel","Catalog menyimpan access key storage permanen di setiap engine yang terdaftar","Catalog mengenkripsi data file lalu membagikan kunci enkripsi ke semua user","Catalog membuat akun storage baru untuk setiap user yang menjalankan query"],
+    "Engine tidak perlu memegang kredensial storage yang luas. Akses ke file mengikuti izin di catalog."],
+  ["polaris", "Snowflake Open Catalog adalah...",
+    ["Layanan terkelola berbasis Apache Polaris","Nama baru untuk Unity Catalog di Databricks","Marketplace dataset publik milik Snowflake","Fitur Snowflake untuk membaca tabel Delta"],
+    "Unity Catalog adalah catalog milik Databricks. Keduanya bisa melayani tabel Iceberg lewat REST API."],
+  // ---------------- Apache Ranger ----------------
+  ["ranger", "Apache Ranger digunakan untuk...",
+    ["Kebijakan otorisasi terpusat dan audit akses untuk ekosistem big data","Katalog metadata dan lineage untuk ekosistem Hadoop, termasuk klasifikasi kolom","Autentikasi user berbasis Kerberos untuk semua service di cluster Hadoop","Enkripsi data at rest dan pengelolaan kunci (KMS) untuk HDFS dan Hive"],
+    "Ranger menyediakan UI dan API untuk kebijakan, plugin untuk penegakan, dan audit log siapa mengakses apa."],
+  ["ranger", "Bagaimana Ranger menegakkan kebijakan di setiap service?",
+    ["Plugin di setiap service mengambil kebijakan dari Ranger Admin lalu memeriksanya","Semua query diproksikan lewat Ranger Admin","Ranger mengubah permission file HDFS setiap ada perubahan kebijakan","Kebijakan disalin manual ke konfigurasi tiap service"],
+    "Plugin menyimpan cache kebijakan, sehingga service tetap bisa memeriksa akses walau Ranger Admin sedang tidak tersedia."],
+  ["ranger", "Tag-based policy di Ranger biasanya memanfaatkan klasifikasi data dari...",
+    ["Apache Atlas","Apache Airflow","Apache Kafka","Apache Hive Metastore"],
+    "Dengan tag-based policy, satu kebijakan (misalnya masking untuk semua kolom bertag PII) berlaku otomatis di semua tabel yang diberi tag."],
+  ["ranger", "Selain allow/deny akses, jenis kebijakan Ranger untuk Hive yang relevan dengan data sensitif adalah...",
+    ["Masking kolom dan row-level filter","Enkripsi kolom dan rotasi kunci enkripsi","Replikasi dan backup tabel lintas cluster","Retensi dan purge data secara otomatis"],
+    "Masking menyamarkan nilai kolom sesuai user/grup, row filter membatasi baris yang terlihat."],
+  // ---------------- RBAC, masking, RLS ----------------
+  ["akses", "Prinsip RBAC (role-based access control) adalah...",
+    ["Izin diberikan ke role, user diberi role sesuai fungsinya","Izin diberikan langsung ke setiap user sesuai permintaan atasannya","Izin ditentukan oleh atribut data seperti tag PII dan lokasi user","Izin mengikuti pemilik tabel yang menyetujui setiap query yang masuk"],
+    "Dengan role, menambah atau mencabut akses cukup dengan mengubah keanggotaan role. Di Snowflake, role bisa bertingkat (role hierarchy)."],
+  ["akses", "Prinsip least privilege berarti...",
+    ["User atau service hanya mendapat hak minimum yang dibutuhkan tugasnya","User junior hak sedikit, user senior hak admin","Hak diberikan seluas mungkin lalu dikurangi kalau ada insiden","Semua user read-only, hanya pipeline yang bisa menulis"],
+    "Service account pipeline, misalnya, cukup punya hak tulis ke schema target, bukan admin seluruh warehouse."],
+  ["akses", "Dynamic column masking bekerja dengan cara...",
+    ["Nilai disamarkan saat query sesuai role; data tersimpan tetap asli","Nilai kolom diganti permanen dengan versi tersamar saat data dimuat ke warehouse","Kolom sensitif dipindahkan ke tabel terpisah yang hanya bisa dibaca oleh admin","Seluruh tabel dienkripsi dan hanya role tertentu yang memegang kunci dekripsinya"],
+    "Contoh: masking policy di Snowflake atau Unity Catalog yang mengembalikan NIK asli hanya untuk role COMPLIANCE."],
+  ["akses", "Tim analytics perlu menghitung jumlah pasien unik tanpa melihat NIK. Pendekatan yang paling tepat adalah...",
+    ["Ganti NIK dengan token atau hash ber-salt yang konsisten","Masking NIK menjadi '****' lalu hitung COUNT DISTINCT","Simpan 4 digit terakhir NIK lalu hitung COUNT DISTINCT","Berikan NIK asli ke analis dengan perjanjian kerahasiaan tertulis"],
+    "Kalau semua nilai di-mask menjadi '****', COUNT DISTINCT menjadi 1. Ingat: data pseudonim tetap data pribadi, jadi akses tetap harus dibatasi."],
+  ["akses", "Row-level security (RLS) dipakai untuk...",
+    ["Membatasi baris yang terlihat sesuai identitas pemanggil","Membatasi kolom yang terlihat, misalnya NIK","Mengunci baris yang sedang di-update agar tidak dibaca transaksi lain","Mengenkripsi baris yang ditandai sensitif"],
+    "Pembatasan kolom adalah column-level security atau masking. RLS bekerja di level baris."],
+  ["akses", "Cara mengimplementasikan row-level security yang paling mudah dipelihara adalah...",
+    ["Policy yang mencocokkan user saat ini dengan tabel mapping","Satu view terpisah untuk setiap user, dibuat manual oleh admin","Satu salinan tabel per region yang di-refresh setiap malam","Filter region yang dipasang di setiap dashboard BI perusahaan"],
+    "Filter yang hanya ada di dashboard bisa dilewati dengan query langsung ke tabel. Tabel mapping membuat perubahan akses cukup dengan mengubah data, bukan kode."],
+  ["akses", "Di mana kontrol akses data sebaiknya ditegakkan?",
+    ["Di layer data (catalog atau engine), berlaku untuk semua tool","Di setiap dashboard BI, karena di sanalah user melihat datanya","Di aplikasi sumber, sebelum data dikirim ke data warehouse","Di dokumentasi data, supaya user tahu data mana yang boleh dipakai"],
+    "Penegakan di catalog atau engine (Unity Catalog, Snowflake policy, Ranger, Polaris) memastikan notebook, BI, dan API tunduk pada aturan yang sama."],
+  ["akses", "Perbedaan ABAC dengan RBAC adalah...",
+    ["ABAC memakai atribut (tag, atribut user, konteks); RBAC memakai role","ABAC untuk akses file di object storage; RBAC untuk akses tabel di warehouse","ABAC adalah nama lain RBAC yang dipakai di platform cloud modern","ABAC hanya mengatur akses baris; RBAC hanya mengatur akses kolom"],
+    "Tag-based masking (misalnya semua kolom bertag PII) adalah contoh pendekatan berbasis atribut. Dalam praktik keduanya sering dikombinasikan."],
+  // ---------------- UU PDP No. 27/2022 ----------------
+  ["uupdp", "Menurut UU No. 27 Tahun 2022, data kesehatan pasien termasuk kategori...",
+    ["Data pribadi yang bersifat spesifik","Data pribadi yang bersifat umum","Rahasia medis di luar cakupan UU PDP","Data pribadi terbatas tanpa persetujuan"],
+    "Data spesifik antara lain data kesehatan, biometrik, genetika, catatan kejahatan, data anak, dan data keuangan pribadi. Pemrosesannya menuntut perlindungan lebih tinggi."],
+  ["uupdp", "Batas waktu pemberitahuan tertulis kepada subjek data dan lembaga ketika terjadi kegagalan pelindungan data pribadi adalah...",
+    ["Paling lambat 3 x 24 jam","Paling lambat 14 x 24 jam","Paling lambat 7 x 24 jam","Paling lambat 30 hari kerja"],
+    "Pemberitahuan memuat data yang terungkap, kapan dan bagaimana terungkap, serta upaya penanganan dan pemulihan."],
+  ["uupdp", "Pihak yang menentukan tujuan dan melakukan kendali atas pemrosesan data pribadi disebut...",
+    ["Pengendali Data Pribadi","Prosesor Data Pribadi","Subjek Data Pribadi","Pejabat Pelindungan Data Pribadi"],
+    "Prosesor memproses data atas nama pengendali, misalnya vendor cloud atau vendor payroll. Subjek data adalah orang yang datanya diproses."],
+  ["uupdp", "Mana yang termasuk hak subjek data menurut UU PDP?",
+    ["Mengakhiri pemrosesan serta meminta penghapusan data pribadinya","Membuka data pribadi pelanggan lain yang terkait","Menentukan berapa lama perusahaan wajib menyimpan datanya","Meminta kompensasi atas setiap pemrosesan datanya"],
+    "Hak lain: mendapat informasi, mengakses dan memperoleh salinan, memperbaiki data, menarik persetujuan, dan keberatan atas keputusan otomatis."],
+  ["uupdp", "Kapan pengendali wajib melakukan penilaian dampak pelindungan data pribadi (DPIA)?",
+    ["Saat pemrosesan berisiko tinggi, misalnya data spesifik","Hanya setelah terjadi kegagalan pelindungan data dan diminta lembaga","Hanya untuk perusahaan yang mentransfer data ke luar negeri","Setiap tahun untuk semua pemrosesan, apa pun risikonya"],
+    "Contoh lain risiko tinggi: pengambilan keputusan otomatis, pemantauan sistematis, dan pencocokan atau penggabungan data."],
+  ["uupdp", "Sanksi administratif berupa denda menurut UU PDP paling tinggi...",
+    ["2% dari pendapatan atau penerimaan tahunan pelanggar","4% dari pendapatan tahunan global perusahaan","10% dari laba bersih tahunan perusahaan","Rp5 miliar untuk setiap pelanggaran"],
+    "Selain denda, sanksi administratif meliputi peringatan tertulis, penghentian sementara pemrosesan, dan penghapusan data. Ada juga ketentuan pidana untuk perbuatan tertentu."],
+  ["uupdp", "Apakah data yang sudah di-hash atau dipseudonimkan masih dianggap data pribadi?",
+    ["Ya, selama masih bisa dikaitkan kembali ke individu","Tidak, data yang di-hash dianggap anonim","Tidak, asalkan hash memakai SHA-256 atau algoritma yang lebih kuat","Ya, tetapi hanya untuk data anak"],
+    "Data pribadi mencakup data yang dapat mengidentifikasi seseorang secara langsung atau tidak langsung, termasuk lewat kombinasi data. Anonimisasi sejati sulit dicapai."],
+  ["uupdp", "UU PDP diundangkan pada 17 Oktober 2022 dengan masa penyesuaian selama...",
+    ["2 tahun, berlaku penuh sejak Oktober 2024","1 tahun, berlaku penuh sejak Oktober 2023","3 tahun, berlaku penuh sejak Oktober 2025","Tidak ada, langsung berlaku penuh saat diundangkan"],
+    "Selama masa itu pengendali dan prosesor wajib menyesuaikan pemrosesan data pribadinya dengan ketentuan UU."],
+  // ---------------- Airflow ----------------
+  ["airflow", "Kenapa alur kerja di Airflow disebut DAG?",
+    ["Task membentuk graph berarah tanpa siklus","Task diulang dalam siklus sampai sukses","Task disusun sebagai pohon dengan satu akar dan satu akhir","Graph tidak berarah yang diurutkan scheduler"],
+    "Directed Acyclic Graph. Siklus (A ke B ke A) dilarang karena tidak ada urutan eksekusi yang valid."],
+  ["airflow", "Hubungan antara operator, task, dan task instance adalah...",
+    ["Operator = kelas, task = operator di DAG, task instance = satu eksekusi task di satu run","Task = kelas, operator = task yang dipasang di DAG, task instance = satu DAG run lengkap","Operator = satu eksekusi task, task = kelas, task instance = task yang dipasang di DAG","Ketiganya istilah yang sama, hanya namanya berbeda antara Airflow 1, Airflow 2, dan Airflow 3"],
+    "Contoh: PythonOperator (operator) dipakai sebagai task extract_orders, dan task instance-nya adalah extract_orders untuk run tanggal 2025-03-14."],
+  ["airflow", "Task yang memanggil API kadang timeout. Konfigurasi yang tepat adalah...",
+    ["retries=3, retry_delay=5 menit, opsional retry_exponential_backoff","retries=0 dan execution_timeout=2 jam","retries=50, retry_delay=1 detik supaya cepat pulih dari timeout","depends_on_past=True dan wait_for_downstream=True"],
+    "Retry cocok untuk error transien. Untuk error deterministik (data rusak, constraint dilanggar) retry hanya membuang waktu."],
+  ["airflow", "DAG dengan start_date 1 Januari 2025, jadwal harian, dan catchup=True baru diaktifkan 1 Maret 2025. Apa yang terjadi?",
+    ["Scheduler membuat run untuk setiap interval yang terlewat","Hanya satu run untuk interval terakhir","Satu run gabungan untuk 1 Januari sampai 1 Maret","Scheduler mengabaikan start_date dan mulai menjadwalkan dari 1 Maret"],
+    "Pakai catchup=False kalau tidak butuh run historis. Di Airflow 2 nilai default mengikuti konfigurasi catchup_by_default (True), di Airflow 3 default-nya False."],
+  ["airflow", "Perbedaan backfill dan catchup adalah...",
+    ["Catchup otomatis oleh scheduler; backfill dipicu manual oleh user untuk rentang tertentu","Backfill otomatis oleh scheduler; catchup dipicu user untuk rentang tertentu","Catchup hanya mengulang task yang gagal; backfill mengulang DAG run yang sukses","Keduanya sama persis, hanya berbeda nama antara Airflow 1 dan Airflow 2"],
+    "Di Airflow 2: airflow dags backfill -s 2025-01-01 -e 2025-01-31 nama_dag. Keduanya hanya aman kalau task idempotent."],
+  ["airflow", "Untuk DAG harian dengan timetable berbasis data interval (perilaku klasik Airflow 2), run dengan logical_date 2025-03-14 biasanya mulai dieksekusi...",
+    ["Sekitar 2025-03-15 00:00","2025-03-14 00:00","Pada 2025-03-13 00:00","Sekitar 2025-03-14 12:00"],
+    "logical_date (dulu execution_date) menandai awal interval data yang diproses, bukan waktu eksekusi. Run berjalan setelah data untuk interval itu lengkap."],
+  ["airflow", "Cara membuat task harian idempotent adalah...",
+    ["Proses partisi sesuai {{ ds }}, lalu overwrite atau MERGE partisi itu","Proses data 24 jam terakhir berdasarkan datetime.now(), lalu append ke target","Proses data yang belum ditandai processed, lalu ubah flag menjadi processed","Proses data sejak waktu task mulai, lalu INSERT dengan kolom load_ts"],
+    "Dengan parameter interval, rerun dan backfill tanggal mana pun memberi hasil yang sama."],
+  ["airflow", "Kenapa start_date=datetime.now() adalah anti-pattern?",
+    ["Nilainya berubah setiap kali DAG di-parse, jadwal jadi tidak deterministik","Airflow tidak bisa membaca zona waktu dari datetime.now() sehingga DAG gagal di-import","DAG akan menjalankan catchup sejak tahun 1970 karena start_date dianggap kosong","datetime.now() hanya boleh dipakai di dalam task, bukan di level DAG, karena alasan keamanan"],
+    "Gunakan tanggal statis, misalnya pendulum.datetime(2025, 1, 1, tz='Asia/Jakarta')."],
+  ["airflow", "Penggunaan XCom yang tepat adalah...",
+    ["Bertukar metadata kecil antar task, misalnya path file","Mengirim DataFrame besar antar task","Menyimpan konfigurasi koneksi database yang dipakai banyak DAG","Menyimpan variabel global semua DAG"],
+    "XCom disimpan di metadata database Airflow. Data besar sebaiknya ditulis ke storage, lalu path-nya yang dikirim lewat XCom."],
+  ["airflow", "Sensor menunggu file selama berjam-jam. Pilihan yang hemat worker slot adalah...",
+    ["mode='reschedule' atau deferrable operator","mode='poke' dengan poke_interval 1 detik","mode='poke' dengan timeout dan soft_fail=True","execution_timeout yang panjang dan retries=0"],
+    "Mode poke memegang worker slot selama menunggu. Reschedule melepas slot di antara pengecekan, deferrable menyerahkan penungguan ke triggerer."],
+  ["airflow", "Task kirim_notifikasi harus tetap jalan apa pun status task sebelumnya. trigger_rule yang tepat adalah...",
+    ["all_done","all_success","one_success","none_failed"],
+    "Default trigger_rule adalah all_success. Untuk notifikasi kegagalan saja, pakai one_failed atau callback on_failure_callback."],
+  ["airflow", "Backfill 60 hari membebani database sumber. Parameter untuk membatasi jumlah run yang berjalan paralel adalah...",
+    ["max_active_runs pada DAG, ditambah pool","retries dan retry_delay yang lebih panjang di semua task","depends_on_past=False pada task yang membaca sumber","catchup=False lalu backfill tanpa batas paralel"],
+    "Pool membatasi jumlah task yang memakai resource tertentu secara bersamaan, misalnya koneksi ke database sumber."],
+  // ---------------- Batch vs streaming ----------------
+  ["streaming", "Perbedaan utama batch dan streaming adalah...",
+    ["Batch: kumpulan data terbatas sesuai jadwal; streaming: aliran tak terbatas secara kontinu","Batch: data dari file; streaming: data dari database relasional","Batch tidak bisa menangani data terlambat; streaming tidak bisa melakukan agregasi","Batch selalu lebih murah; streaming selalu lebih akurat untuk laporan bisnis"],
+    "Pilihan ditentukan kebutuhan latensi bisnis, biaya, dan kompleksitas operasional."],
+  ["streaming", "Event dari HP sales rep terkirim terlambat 2 jam karena sinyal buruk. Supaya laporan per jam akurat, window harus berdasarkan...",
+    ["Event time dengan watermark","Processing time","Ingestion time agar urutan offset Kafka terjaga","Waktu commit ke tabel target"],
+    "Processing time membuat event terlambat masuk ke jam yang salah."],
+  ["streaming", "Fungsi watermark di stream processing adalah...",
+    ["Batas keterlambatan event untuk sebuah window, supaya state lama bisa dibuang","Penanda offset terakhir yang sudah di-commit consumer ke Kafka setelah memproses batch","Batas ukuran state maksimal yang boleh disimpan executor sebelum ditulis ke disk","Penanda waktu kapan micro-batch berikutnya dipicu oleh trigger interval"],
+    "Tanpa watermark, state agregasi harus disimpan selamanya karena event lama bisa datang kapan saja."],
+  ["streaming", "Window 5 menit yang tidak saling tumpang tindih (00:00 sampai 00:05, 00:05 sampai 00:10, dan seterusnya) disebut...",
+    ["Tumbling window","Sliding window","Session window","Global window"],
+    "Sliding window bisa tumpang tindih (misalnya panjang 10 menit, geser 5 menit). Session window dibentuk oleh jeda tidak aktif."],
+  ["streaming", "Spark Structured Streaming secara default memproses data dengan cara...",
+    ["Micro-batch per trigger interval","Continuous per event","Batch harian dari scheduler eksternal","Satu job Spark baru per event"],
+    "Ada juga continuous processing mode yang eksperimental. Micro-batch dengan trigger beberapa detik sampai menit sudah cukup untuk banyak kebutuhan near real-time."],
+  ["streaming", "Exactly-once end-to-end biasanya dicapai dengan...",
+    ["Replay dari checkpoint plus sink idempotent atau transaksional","Mematikan retry di consumer supaya pesan tidak pernah diproses dua kali","Menambah partisi Kafka sehingga setiap pesan hanya dibaca satu consumer","Commit offset ke Kafka lebih dulu, sebelum data ditulis ke sink"],
+    "Kegagalan pasti terjadi. Yang dijamin adalah efek akhirnya hanya sekali walaupun data diproses ulang."],
+  ["streaming", "Laporan penjualan hanya dibaca direksi setiap pagi. Pendekatan yang paling masuk akal adalah...",
+    ["Batch harian, karena streaming tidak memberi manfaat di sini","Streaming per event supaya angka selalu terkini saat direksi membuka laporan","Micro-batch setiap menit supaya data siap kapan pun dibutuhkan direksi","Streaming dengan Kafka agar arsitektur siap untuk kebutuhan masa depan"],
+    "Di interview, tunjukkan Anda menanyakan kebutuhan latensi sebelum memilih teknologi."],
+  // ---------------- CDC ----------------
+  ["cdc", "Kelebihan CDC berbasis log (misalnya Debezium membaca binlog MySQL atau WAL PostgreSQL) dibanding query berbasis kolom updated_at adalah...",
+    ["Menangkap DELETE dan semua perubahan tanpa bergantung kolom timestamp","Tidak butuh izin khusus di database sumber","Lebih sederhana karena tidak butuh Kafka Connect","Menjamin target selalu konsisten sehingga rekonsiliasi tidak diperlukan lagi"],
+    "Konsekuensinya: perlu izin replikasi, pengaturan retensi log, dan infrastruktur tambahan (misalnya Kafka Connect)."],
+  ["cdc", "Kelemahan incremental extract berbasis kolom updated_at adalah...",
+    ["Hard delete tidak terdeteksi dan update tanpa updated_at terlewat","Query selalu membaca seluruh tabel sehingga sangat berat untuk database sumber","Tidak bisa dijadwalkan di Airflow karena butuh koneksi yang terus terbuka","Hanya bisa dipakai untuk tabel yang punya primary key bertipe angka"],
+    "Mitigasinya: soft delete di sumber, lookback window beberapa hari, atau rekonsiliasi berkala dengan full extract."],
+  ["cdc", "Saat pertama kali memasang CDC pada tabel yang sudah berisi data, langkah awal yang dibutuhkan adalah...",
+    ["Initial snapshot, lalu lanjut membaca log dari posisi setelah snapshot","Membaca log dari awal binlog yang tersedia untuk merekonstruksi seluruh data","Membaca perubahan baru saja; data lama dimuat manual kalau suatu saat dibutuhkan","Mengosongkan tabel target lalu menunggu semua baris di sumber di-update"],
+    "Debezium melakukan snapshot lalu streaming secara otomatis, sambil mencatat posisi log supaya tidak ada perubahan yang hilang di antaranya."],
+  ["cdc", "Event CDC untuk primary key yang sama datang dengan urutan tertukar. Cara menjaga hasil akhir tetap benar adalah...",
+    ["MERGE hanya kalau posisi log atau versi event lebih baru","Selalu menimpa dengan event terakhir diterima","Urutkan event berdasarkan waktu diterima consumer sebelum MERGE","Buang event update, proses insert dan delete saja"],
+    "Di Kafka, gunakan primary key sebagai message key supaya event untuk key yang sama masuk partisi yang sama dan urutannya terjaga."],
+  ["cdc", "Di Kafka, pesan CDC untuk baris yang dihapus biasanya diikuti pesan tombstone (value null). Gunanya adalah...",
+    ["Log compaction bisa menghapus semua pesan lama untuk key itu","Memberi tahu consumer bahwa pesan sebelumnya rusak dan harus dibaca ulang","Menandai akhir snapshot awal sebelum streaming perubahan dimulai","Menjaga urutan pesan tetap benar di semua partisi topic"],
+    "Topic dengan cleanup.policy=compact hanya menyimpan nilai terakhir per key. Tombstone membuat key tersebut akhirnya hilang dari topic."],
+  // ---------------- Idempotency ----------------
+  ["idempotency", "Pipeline yang idempotent berarti...",
+    ["Dijalankan berkali-kali, keadaan akhirnya sama seperti sekali jalan","Dijalankan berkali-kali, hasilnya bertambah sesuai jumlah run yang terjadi","Tidak pernah gagal karena semua error ditangkap lalu diabaikan oleh pipeline","Bisa dijalankan paralel tanpa perlu mengunci tabel target sama sekali"],
+    "Idempotency membuat retry, rerun, dan backfill aman."],
+  ["idempotency", "Mana yang TIDAK idempotent?",
+    ["INSERT INTO fact SELECT * FROM staging, dijalankan di setiap run","MERGE INTO fact berdasarkan natural key","INSERT OVERWRITE partisi tanggal yang diproses","DELETE partisi tanggal lalu INSERT dalam satu transaksi"],
+    "INSERT buta menambah duplikat setiap kali dijalankan ulang."],
+  ["idempotency", "Message queue menjamin at-least-once delivery. Supaya hasil tidak dobel, consumer harus...",
+    ["Idempotent, misalnya dedup per event id atau upsert per key","Commit offset sebelum memproses pesan","Memakai satu consumer saja supaya tidak ada pesan yang diproses dua kali","Memproses pesan dalam batch besar"],
+    "At-least-once ditambah consumer idempotent menghasilkan efek effectively-once."],
+  ["idempotency", "Penyebab umum pipeline tidak idempotent adalah...",
+    ["Bergantung pada now() atau urutan run","Memakai MERGE berdasarkan natural key","Menulis ke partisi tanggal data","Mengaktifkan retry otomatis"],
+    "Rerun hari Senin untuk data hari Jumat harus memproses data hari Jumat, bukan data 'kemarin'."],
+  ["idempotency", "Surrogate key dimensi dibangkitkan ulang dengan sequence baru setiap kali pipeline dijalankan. Kenapa ini berbahaya?",
+    ["Baris yang sama bisa mendapat key berbeda, FK di fact jadi salah tunjuk","Sequence tidak dijamin unik di warehouse cloud","Sequence mengunci dimensi selama pipeline sehingga query BI gagal","Sequence hanya menghasilkan angka genap sehingga key cepat habis"],
+    "Pertahankan key yang sudah ada (lookup berdasarkan natural key) dan hanya buat key baru untuk baris baru, atau gunakan hash dari natural key."],
+  // ---------------- Medallion architecture ----------------
+  ["medallion", "Pembagian layer di medallion architecture adalah...",
+    ["Bronze mentah, Silver bersih dan terintegrasi, Gold siap konsumsi","Bronze bersih dan terintegrasi, Silver mentah, Gold siap konsumsi bisnis","Bronze mentah, Silver siap konsumsi bisnis, Gold arsip jangka panjang","Bronze data streaming, Silver data batch, Gold gabungan keduanya"],
+    "Nama lain yang sering dipakai: raw/landing, staging/core, mart/presentation."],
+  ["medallion", "Kenapa data di layer bronze disimpan apa adanya?",
+    ["Supaya bisa replay atau reprocess saat logika berubah, dan untuk audit","Supaya dashboard lebih cepat","Supaya skema silver bisa dibuat otomatis dari bronze","Supaya storage lebih hemat"],
+    "Tambahkan metadata ingest (waktu ingest, file sumber, batch id) di bronze supaya jejaknya bisa ditelusuri."],
+  ["medallion", "Deduplikasi, standardisasi tipe data, dan join ke master data idealnya dilakukan di layer...",
+    ["Silver","Bronze","Gold","Landing"],
+    "Silver adalah sumber kebenaran yang bersih dan terintegrasi. Gold berisi model untuk use case tertentu."],
+  ["medallion", "Star schema fact_sales dan dim_product untuk kebutuhan BI biasanya berada di layer...",
+    ["Gold","Silver","Bronze","Landing"],
+    "Gold dioptimalkan untuk konsumsi: definisi metrik konsisten, nama kolom ramah bisnis, dan performa query."]
+];
+
+const FLASH = [
+  ["Grain", "Pernyataan tentang apa yang diwakili SATU baris fact table, misalnya satu baris per item order. Ditentukan sebelum memilih dimensi dan measure."],
+  ["Additive, semi-additive, non-additive", "Additive boleh dijumlah di semua dimensi (quantity). Semi-additive tidak boleh dijumlah antar waktu (saldo, stok). Non-additive tidak boleh dijumlah sama sekali (rasio, harga satuan)."],
+  ["SCD Type 1, 2, 3", "Type 1 menimpa nilai lama. Type 2 membuat baris baru dengan valid_from, valid_to, is_current. Type 3 menyimpan nilai sebelumnya di kolom tambahan."],
+  ["Periodic vs accumulating snapshot", "Periodic snapshot mencatat posisi per periode tetap (stok harian). Accumulating snapshot satu baris per proses yang diperbarui di setiap milestone (perjalanan order)."],
+  ["Factless fact table", "Fact table tanpa measure, mencatat kejadian atau cakupan (kunjungan, promosi aktif). Berguna untuk menjawab apa yang TIDAK terjadi lewat anti join."],
+  ["Medallion architecture", "Bronze (mentah), silver (bersih dan terintegrasi), gold (siap konsumsi bisnis)."],
+  ["CDC", "Change Data Capture: menangkap insert, update, delete dari sumber. Berbasis log (binlog, WAL) lebih lengkap dibanding berbasis kolom updated_at."],
+  ["Idempotency", "Menjalankan ulang dengan input yang sama memberi hasil akhir yang sama. Dicapai dengan MERGE, overwrite partisi, atau dedup berdasarkan key."],
+  ["Event time vs processing time", "Event time adalah waktu kejadian di sumber, processing time adalah waktu data diproses. Agregasi bisnis hampir selalu memakai event time."],
+  ["Watermark", "Batas keterlambatan event yang masih diterima, sehingga engine stream bisa menutup window dan membuang state lama."],
+  ["Catchup vs backfill (Airflow)", "Catchup: scheduler otomatis membuat run untuk interval terlewat sejak start_date. Backfill: user menjalankan rentang tanggal tertentu secara eksplisit."],
+  ["logical_date / data_interval", "Penanda interval data yang diproses sebuah DAG run. Dipakai sebagai parameter supaya task idempotent, misalnya lewat template {{ ds }}."],
+  ["Sensor mode reschedule", "Sensor melepas worker slot di antara pengecekan. Mode poke menahan slot selama menunggu."],
+  ["Snowflake Time Travel dan Fail-safe", "Time Travel: query atau restore data lama oleh user (1 hari default, sampai 90 hari di Enterprise). Fail-safe: 7 hari tambahan, hanya bisa dipulihkan oleh Snowflake."],
+  ["Zero-copy clone", "Salinan tabel/schema/database berbasis metadata yang berbagi micro-partition dengan sumbernya sampai ada perubahan."],
+  ["Micro-partition pruning", "Snowflake melewati micro-partition yang rentang min/max kolomnya tidak cocok dengan filter."],
+  ["Unity Catalog", "Layer governance Databricks: namespace catalog.schema.table, izin terpusat, lineage, dan audit lintas workspace."],
+  ["OPTIMIZE, ZORDER, VACUUM", "OPTIMIZE menggabungkan file kecil, ZORDER mengelompokkan data untuk data skipping, VACUUM menghapus file lama di luar periode retensi."],
+  ["Delta transaction log", "Folder _delta_log berisi JSON per commit dan checkpoint Parquet berkala. Sumber kebenaran isi tabel Delta."],
+  ["Struktur metadata Iceberg", "Catalog menunjuk metadata.json, yang berisi daftar snapshot. Snapshot menunjuk manifest list, lalu manifest file, lalu data file."],
+  ["Hidden partitioning", "Iceberg menurunkan nilai partisi dari kolom asli dengan transform (day, month, bucket), sehingga user tidak perlu memfilter kolom partisi buatan."],
+  ["Small files problem", "Terlalu banyak file kecil memperlambat query dan membebani metadata. Atasi dengan compaction dan ukuran batch tulis yang masuk akal."],
+  ["Apache Polaris", "Iceberg REST catalog open source (berasal dari Snowflake) dengan kontrol akses dan credential vending, supaya banyak engine bisa memakai tabel yang sama."],
+  ["Apache Ranger", "Manajemen kebijakan akses terpusat untuk ekosistem big data, dengan plugin per service, masking, row filter, tag-based policy, dan audit."],
+  ["RBAC", "Izin diberikan ke role, user diberi role. Dikombinasikan dengan least privilege."],
+  ["Dynamic column masking", "Nilai kolom disamarkan saat query sesuai role pemanggil, tanpa mengubah data tersimpan."],
+  ["Row-level security", "Pembatasan baris yang terlihat berdasarkan identitas pemanggil, biasanya lewat tabel mapping user ke wilayah atau unit."],
+  ["UU PDP: data pribadi spesifik", "Antara lain data kesehatan, biometrik, genetika, catatan kejahatan, data anak, dan data keuangan pribadi."],
+  ["UU PDP: kegagalan pelindungan data", "Pemberitahuan tertulis kepada subjek data dan lembaga paling lambat 3 x 24 jam."],
+  ["Pengendali vs prosesor data", "Pengendali menentukan tujuan dan cara pemrosesan. Prosesor memproses atas nama pengendali."],
+  ["Lambda vs Kappa", "Lambda: jalur batch dan jalur streaming terpisah lalu digabung. Kappa: satu jalur streaming, reprocessing dilakukan dengan replay log."],
+  ["Data contract", "Kesepakatan tertulis antara produsen dan konsumen data tentang skema, semantik, kualitas, dan SLA, supaya perubahan di sumber tidak diam-diam merusak pipeline."]
+];
+
+/* ================= penyimpanan (localStorage, aman kalau tidak tersedia) ================= */
+const STORE_KEY = "de-interview-quiz.v1";
+function loadStore() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    const d = raw ? JSON.parse(raw) : {};
+    return { history: d.history || [], perQ: d.perQ || {} };
+  } catch (e) { return { history: [], perQ: {} }; }
+}
+function saveStore() {
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) { /* abaikan */ }
+}
+let store = loadStore();
+
+/* ================= util ================= */
+const $ = (id) => document.getElementById(id);
+function shuffle(a) {
+  const r = a.slice();
+  for (let i = r.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [r[i], r[j]] = [r[j], r[i]];
+  }
+  return r;
+}
+function esc(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+// id stabil per soal (berdasarkan topik + teks soal) untuk statistik
+function qid(item) {
+  let h = 0;
+  const s = item[0] + "|" + item[1];
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return item[0] + ":" + (h >>> 0).toString(36);
+}
+
+/* ================= navigasi ================= */
+document.querySelectorAll("nav button").forEach((b) => {
+  b.addEventListener("click", () => showView(b.dataset.view));
+});
+function showView(v) {
+  document.querySelectorAll("nav button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
+  ["quiz", "flash", "stats"].forEach((k) => $("v-" + k).classList.toggle("hidden", k !== v));
+  if (v === "stats") renderStats();
+  if (v === "flash") renderFlash();
+}
+
+/* ================= pengaturan kuis ================= */
+const selected = new Set();
+function renderChips() {
+  const counts = {};
+  BANK.forEach((q) => { counts[q[0]] = (counts[q[0]] || 0) + 1; });
+  $("topicChips").innerHTML = Object.entries(TOPICS).map(([k, label]) =>
+    `<button class="chip" data-topic="${k}" aria-pressed="${selected.has(k)}">${esc(label)} <span class="muted">${counts[k] || 0}</span></button>`
+  ).join("");
+  $("topicChips").querySelectorAll(".chip").forEach((c) => c.addEventListener("click", () => {
+    const t = c.dataset.topic;
+    selected.has(t) ? selected.delete(t) : selected.add(t);
+    c.setAttribute("aria-pressed", String(selected.has(t)));
+  }));
+  $("bankInfo").textContent = `${BANK.length} soal pilihan ganda di ${Object.keys(TOPICS).length} topik, ${FLASH.length} flashcard.`;
+}
+
+/* ================= sesi kuis ================= */
+let session = null;
+
+function startQuiz(pool, label) {
+  if (!pool.length) {
+    $("bankInfo").textContent = "Tidak ada soal untuk pilihan ini.";
+    return;
+  }
+  const n = $("count").value === "all" ? pool.length : Math.min(Number($("count").value), pool.length);
+  const items = shuffle(pool).slice(0, n).map((item) => {
+    // simpan urutan opsi teracak; jawaban benar hanya diketahui di memori JS
+    const order = shuffle(item[2].map((_, i) => i));
+    return { item, order, correctPos: order.indexOf(0), chosen: null };
+  });
+  session = { items, i: 0, label, answered: false };
+  $("setup").classList.add("hidden");
+  $("result").classList.add("hidden");
+  $("play").classList.remove("hidden");
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const s = session, cur = s.items[s.i];
+  s.answered = false;
+  $("qTopic").textContent = TOPICS[cur.item[0]];
+  $("qPos").textContent = `Soal ${s.i + 1} dari ${s.items.length}`;
+  $("qBar").style.width = `${(s.i / s.items.length) * 100}%`;
+  $("qText").textContent = cur.item[1];
+  $("qExplain").innerHTML = "";
+  $("nextBtn").disabled = true;
+  $("nextBtn").textContent = s.i === s.items.length - 1 ? "Lihat hasil" : "Lanjut";
+  $("qOpts").innerHTML = cur.order.map((origIdx, pos) =>
+    `<button class="opt" data-pos="${pos}"><span class="k">${pos + 1}</span><span>${esc(cur.item[2][origIdx])}</span></button>`
+  ).join("");
+  $("qOpts").querySelectorAll(".opt").forEach((b) => b.addEventListener("click", () => answer(Number(b.dataset.pos))));
+}
+
+function answer(pos) {
+  const s = session;
+  if (!s || s.answered) return;
+  const cur = s.items[s.i];
+  s.answered = true;
+  cur.chosen = pos;
+  const right = pos === cur.correctPos;
+  const btns = $("qOpts").querySelectorAll(".opt");
+  btns.forEach((b, k) => {
+    b.disabled = true;
+    if (k === cur.correctPos) b.classList.add("ok");
+    else if (k === pos) b.classList.add("bad");
+  });
+  $("qExplain").innerHTML = `<div class="explain"><b class="${right ? "ok" : "bad"}">${right ? "Benar." : "Kurang tepat."}</b> ${esc(cur.item[3])}</div>`;
+  const id = qid(cur.item);
+  const st = store.perQ[id] || { r: 0, w: 0 };
+  right ? st.r++ : st.w++;
+  st.last = right ? 1 : 0;
+  store.perQ[id] = st;
+  saveStore();
+  $("nextBtn").disabled = false;
+  $("nextBtn").focus();
+}
+
+function next() {
+  const s = session;
+  if (!s || !s.answered) return;
+  if (s.i < s.items.length - 1) { s.i++; renderQuestion(); }
+  else finish();
+}
+
+function finish() {
+  const s = session;
+  const done = s.items.filter((x) => x.chosen !== null);
+  const right = done.filter((x) => x.chosen === x.correctPos);
+  const perTopic = {};
+  done.forEach((x) => {
+    const t = x.item[0];
+    perTopic[t] = perTopic[t] || { r: 0, n: 0 };
+    perTopic[t].n++;
+    if (x.chosen === x.correctPos) perTopic[t].r++;
+  });
+  if (done.length) {
+    store.history.push({ at: new Date().toISOString(), label: s.label, score: right.length, total: done.length });
+    store.history = store.history.slice(-50);
+    saveStore();
+  }
+  const pct = done.length ? Math.round((right.length / done.length) * 100) : 0;
+  const wrong = done.filter((x) => x.chosen !== x.correctPos);
+  $("play").classList.add("hidden");
+  $("result").classList.remove("hidden");
+  $("result").innerHTML = `
+    <div class="muted">${esc(s.label)}</div>
+    <div class="score">${right.length} / ${done.length} <span class="muted" style="font-size:1rem">(${pct}%)</span></div>
+    <table><thead><tr><th>Topik</th><th class="num">Benar</th></tr></thead><tbody>
+      ${Object.entries(perTopic).map(([t, v]) => `<tr><td>${esc(TOPICS[t])}</td><td class="num">${v.r} / ${v.n}</td></tr>`).join("")}
+    </tbody></table>
+    ${wrong.length ? `<h3>Perlu diulang</h3><ul class="wrong-list">${wrong.map((x) =>
+      `<li><b>${esc(x.item[1])}</b><br>Jawaban benar: ${esc(x.item[2][0])}<br><span class="muted">${esc(x.item[3])}</span></li>`).join("")}</ul>` : ""}
+    <div class="row"><button class="btn primary" id="againBtn">Kuis lagi</button></div>`;
+  $("againBtn").addEventListener("click", () => {
+    $("result").classList.add("hidden");
+    $("setup").classList.remove("hidden");
+    session = null;
+  });
+}
+
+$("startBtn").addEventListener("click", () => {
+  const pool = selected.size ? BANK.filter((q) => selected.has(q[0])) : BANK;
+  const label = selected.size ? [...selected].map((t) => TOPICS[t]).join(", ") : "Semua topik";
+  startQuiz(pool, label);
+});
+$("retryWrongBtn").addEventListener("click", () => {
+  const pool = BANK.filter((q) => { const st = store.perQ[qid(q)]; return st && st.last === 0; });
+  if (!pool.length) { $("bankInfo").textContent = "Belum ada soal yang terakhir dijawab salah. Kerjakan kuis dulu."; return; }
+  startQuiz(pool, "Ulangi soal yang terakhir salah");
+});
+$("nextBtn").addEventListener("click", next);
+$("quitBtn").addEventListener("click", finish);
+
+document.addEventListener("keydown", (e) => {
+  if ($("v-quiz").classList.contains("hidden") || !session || $("play").classList.contains("hidden")) return;
+  if (["1", "2", "3", "4"].includes(e.key)) {
+    const pos = Number(e.key) - 1;
+    if (pos < session.items[session.i].order.length) answer(pos);
+  } else if (e.key === "Enter" && session.answered) {
+    e.preventDefault();
+    next();
+  }
+});
+
+/* ================= flashcard ================= */
+let fDeck = shuffle(FLASH.map((_, i) => i)), fI = 0, fFlipped = false;
+function renderFlash() {
+  const card = FLASH[fDeck[fI]];
+  $("fPos").textContent = `Kartu ${fI + 1} dari ${fDeck.length}`;
+  // definisi baru dimasukkan ke DOM setelah kartu dibalik
+  $("fCard").innerHTML = `<div class="term">${esc(card[0])}</div>` +
+    (fFlipped ? `<div class="def">${esc(card[1])}</div>` : `<div class="def muted">Coba jelaskan dengan kata-kata sendiri, lalu klik untuk membalik.</div>`);
+  $("fFlip").textContent = fFlipped ? "Tutup" : "Balik";
+}
+function flip() { fFlipped = !fFlipped; renderFlash(); }
+$("fCard").addEventListener("click", flip);
+$("fCard").addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); flip(); } });
+$("fFlip").addEventListener("click", flip);
+$("fNext").addEventListener("click", () => { fI = (fI + 1) % fDeck.length; fFlipped = false; renderFlash(); });
+$("fPrev").addEventListener("click", () => { fI = (fI - 1 + fDeck.length) % fDeck.length; fFlipped = false; renderFlash(); });
+$("fShuffle").addEventListener("click", () => { fDeck = shuffle(fDeck); fI = 0; fFlipped = false; renderFlash(); });
+
+/* ================= statistik ================= */
+let resetArmed = false;
+function renderStats() {
+  const perTopic = {};
+  BANK.forEach((q) => {
+    const t = q[0], st = store.perQ[qid(q)];
+    perTopic[t] = perTopic[t] || { seen: 0, total: 0, r: 0, w: 0, lastWrong: 0 };
+    perTopic[t].total++;
+    if (st) {
+      perTopic[t].seen++; perTopic[t].r += st.r; perTopic[t].w += st.w;
+      if (st.last === 0) perTopic[t].lastWrong++;
+    }
+  });
+  const hist = store.history.slice(-15).reverse();
+  $("statsBody").innerHTML = `
+    <h3 style="margin-top:0">Per topik</h3>
+    <table><thead><tr><th>Topik</th><th class="num">Soal dilihat</th><th class="num">Akurasi</th><th class="num">Terakhir salah</th></tr></thead><tbody>
+    ${Object.entries(TOPICS).map(([k, label]) => {
+      const v = perTopic[k] || { seen: 0, total: 0, r: 0, w: 0, lastWrong: 0 };
+      const acc = v.r + v.w ? Math.round((v.r / (v.r + v.w)) * 100) + "%" : "-";
+      return `<tr><td>${esc(label)}</td><td class="num">${v.seen} / ${v.total}</td><td class="num">${acc}</td><td class="num">${v.lastWrong}</td></tr>`;
+    }).join("")}
+    </tbody></table>
+    <h3>Riwayat sesi</h3>
+    ${hist.length ? `<table><thead><tr><th>Waktu</th><th>Topik</th><th class="num">Skor</th></tr></thead><tbody>${hist.map((h) =>
+      `<tr><td>${esc(new Date(h.at).toLocaleString("id-ID"))}</td><td>${esc(h.label)}</td><td class="num">${h.score} / ${h.total}</td></tr>`).join("")}</tbody></table>`
+      : `<p class="muted">Belum ada sesi.</p>`}
+    <div class="row"><button class="btn" id="resetBtn">${resetArmed ? "Klik lagi untuk menghapus semua skor" : "Hapus semua skor"}</button></div>`;
+  $("resetBtn").addEventListener("click", () => {
+    if (!resetArmed) { resetArmed = true; renderStats(); return; }
+    store = { history: [], perQ: {} };
+    saveStore();
+    resetArmed = false;
+    renderStats();
+  });
+}
+
+renderChips();
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+-- ==========================================================================
+-- S25 | Query lambat 3: scan berulang
+-- Tingkat: SULIT | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Query di bawah membuat ringkasan per segment. Setiap kolom dihitung di subquery
+--   terpisah, sehingga tabel transaksi di-scan 4 kali.
+--
+--       SELECT s.segment, a.rev_2024, b.rev_2025, c.orders_2025, e.avg_qty_2025
+--       FROM (SELECT DISTINCT segment FROM products) s
+--       LEFT JOIN (SELECT p.segment, SUM(oi.line_amount) AS rev_2024
+--                  FROM order_items_clean oi JOIN orders_clean o USING (order_id)
+--                  JOIN products p USING (product_code)
+--                  WHERE o.status = 'COMPLETED'
+--                    AND o.order_date >= DATE '2024-01-01' AND o.order_date < DATE '2025-01-01'
+--                  GROUP BY 1) a USING (segment)
+--       LEFT JOIN (SELECT p.segment, SUM(oi.line_amount) AS rev_2025
+--                  FROM order_items_clean oi JOIN orders_clean o USING (order_id)
+--                  JOIN products p USING (product_code)
+--                  WHERE o.status = 'COMPLETED'
+--                    AND o.order_date >= DATE '2025-01-01' AND o.order_date < DATE '2026-01-01'
+--                  GROUP BY 1) b USING (segment)
+--       LEFT JOIN (SELECT p.segment, COUNT(DISTINCT o.order_id) AS orders_2025
+--                  FROM order_items_clean oi JOIN orders_clean o USING (order_id)
+--                  JOIN products p USING (product_code)
+--                  WHERE o.status = 'COMPLETED'
+--                    AND o.order_date >= DATE '2025-01-01' AND o.order_date < DATE '2026-01-01'
+--                  GROUP BY 1) c USING (segment)
+--       LEFT JOIN (SELECT p.segment, AVG(oi.quantity) AS avg_qty_2025
+--                  FROM order_items_clean oi JOIN orders_clean o USING (order_id)
+--                  JOIN products p USING (product_code)
+--                  WHERE o.status = 'COMPLETED'
+--                    AND o.order_date >= DATE '2025-01-01' AND o.order_date < DATE '2026-01-01'
+--                  GROUP BY 1) e USING (segment)
+--       ORDER BY 1;
+--
+--   Tulis ulang supaya order_items_clean dan orders_clean masing-masing hanya disebut SATU kali
+--   dan tidak ada UNION. Hasil harus identik.
+--
+-- Tabel        : orders_clean, order_items_clean, products
+-- Kolom output : segment, rev_2024, rev_2025, orders_2025, avg_qty_2025
+-- Urutan baris : segment ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s25
+-- Petunjuk     : task hint -- s25   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

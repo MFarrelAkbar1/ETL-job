@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S06 | Anti join pada data kotor: distributor yatim
+-- Tingkat: MUDAH | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Sebagian order punya distributor_id yang TIDAK ADA di master distributors (orphan).
+--   Untuk setiap distributor_id orphan (abaikan yang NULL), hitung jumlah order (semua status)
+--   dan revenue (hanya order COMPLETED). Ini adalah pengecekan referential integrity.
+--
+-- Tabel        : orders_clean, order_items_clean, distributors
+-- Kolom output : distributor_id, n_orders, revenue (dibulatkan 2 desimal)
+-- Urutan baris : distributor_id ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s06
+-- Petunjuk     : task hint -- s06   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

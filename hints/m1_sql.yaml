@@ -1,0 +1,102 @@
+# Petunjuk bertahap Modul 1. Level 1 = arah, level 2 = konsep/fungsi, level 3 = kerangka.
+# Tidak ada jawaban lengkap di sini.
+s01:
+  - Cukup satu tabel. Ada dua syarat di WHERE.
+  - is_active bertipe BOOLEAN, jadi bisa ditulis langsung tanpa "= TRUE".
+  - ORDER BY dengan dua kolom, arah urutnya berbeda.
+s02:
+  - Tiga tabel. Filter status dan rentang tanggal 2025.
+  - Setelah JOIN ke item, satu order menjadi beberapa baris. Fungsi agregasi apa yang menghitung order unik?
+  - "Kerangka: SELECT ... COUNT(DISTINCT ...), ROUND(SUM(...), 2) FROM ... JOIN ... JOIN ... WHERE ... GROUP BY ... ORDER BY ..."
+s03:
+  - Tabel kiri harus regions supaya semua region muncul.
+  - COUNT(*) menghitung baris, termasuk baris hasil LEFT JOIN yang kolom kanannya NULL. COUNT(kolom) melewati NULL.
+  - Untuk n_active, pakai COUNT(...) FILTER (WHERE ...) atau COUNT(CASE WHEN ... THEN 1 END). SUM(CASE ...) tanpa ELSE menghasilkan NULL.
+s04:
+  - Syarat pada hasil agregasi tidak bisa di WHERE.
+  - WHERE menyaring baris SEBELUM grouping, HAVING menyaring grup SETELAH agregasi.
+  - HAVING bisa berisi dua kondisi agregasi yang digabung AND.
+s05:
+  - Yang dicari adalah baris di products yang TIDAK punya pasangan di order_items_clean.
+  - Pola anti join, yaitu NOT EXISTS (subquery berkorelasi) atau LEFT JOIN lalu WHERE kolom_kanan IS NULL.
+  - "Bayangkan 1 NOT IN (2, NULL): hasilnya bukan TRUE, tapi NULL. Itu sebabnya NOT IN berbahaya."
+s06:
+  - Mulai dari orders_clean, cari distributor_id yang tidak ada di master.
+  - n_orders menghitung semua status, revenue hanya COMPLETED. Satu query bisa menghitung keduanya.
+  - SUM(x) FILTER (WHERE status = ...) atau SUM(CASE WHEN status = ... THEN x END). Jangan lupa COALESCE kalau hasilnya bisa NULL.
+s07:
+  - Bandingkan beberapa nilai product_code mentah dengan master. Apa bedanya?
+  - Dua fungsi string dibutuhkan, satu untuk huruf, satu untuk spasi.
+  - COUNT(*) dan COUNT(quantity) berbeda kalau quantity bisa NULL.
+s08:
+  - Satu baris per category, kuartal menjadi kolom.
+  - Agregasi kondisional, satu ekspresi SUM per kuartal. Fungsi quarter(date) tersedia di DuckDB.
+  - "Kuartal kosong: COALESCE(SUM(...) FILTER (WHERE quarter(order_date) = 1), 0)."
+s09:
+  - Ada dua tabel detail (order_items_clean dan returns) yang sama-sama many-to-one ke orders.
+  - JOIN dua tabel detail sekaligus menyebabkan fan-out. Agregasikan masing-masing di CTE terpisah.
+  - "Kerangka: base_orders (order 2025 + region) -> gross (SUM item per region) -> refund (SUM returns per region) -> gabungkan dengan LEFT JOIN."
+s10:
+  - Ada tiga format. Cobalah setiap format satu per satu.
+  - TRY_STRPTIME mengembalikan NULL kalau gagal, bukan error. COALESCE mengambil yang pertama tidak NULL.
+  - Setelah dapat tanggal, DATE_TRUNC('month', ...)::DATE. Hitung order_id unik, dan ORDER BY ... NULLS LAST.
+s11:
+  - Tiga window function dengan PARTITION BY dan ORDER BY yang sama, kecuali tie-breaker untuk ROW_NUMBER.
+  - Window function tidak boleh dipakai langsung di WHERE. Pakai QUALIFY (DuckDB/Snowflake/Databricks) atau bungkus di subquery.
+  - "Harga sama: ROW_NUMBER tetap 1,2,3; RANK jadi 1,1,3; DENSE_RANK jadi 1,1,2."
+s12:
+  - Langkah 1 hitung revenue per produk, langkah 2 ranking di dalam category.
+  - ROW_NUMBER() OVER (PARTITION BY category ORDER BY revenue DESC).
+  - Filter rank <= 3 di query luar (atau QUALIFY). Kolom rank harus ikut di SELECT.
+s13:
+  - DISTINCT tidak cukup karena versi berbeda punya nilai kolom yang berbeda.
+  - Beri nomor setiap baris di dalam order_id yang sama, diurutkan dari updated_at terbaru.
+  - "ROW_NUMBER() OVER (PARTITION BY order_id ORDER BY updated_at DESC) lalu ambil nomor 1."
+s14:
+  - Pertama buat tabel revenue bulanan per segment (CTE). Baru setelah itu window function.
+  - LAG(revenue) OVER (PARTITION BY segment ORDER BY month).
+  - Supaya tidak menulis OVER berulang, DuckDB mendukung klausa WINDOW w AS (...). Bulatkan di akhir.
+s15:
+  - Buat dulu daftar (distributor_id, order_date) yang unik.
+  - LEAD(order_date) OVER (PARTITION BY distributor_id ORDER BY order_date).
+  - Selisih dua DATE di DuckDB menghasilkan INTEGER hari. Filter gap di query luar.
+s16:
+  - Agregasi harian per region dulu, baru running total.
+  - SUM(daily_revenue) OVER (PARTITION BY ... ORDER BY order_date). Reset per tahun berarti tahun ikut di PARTITION BY.
+  - Frame eksplisit ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW lebih aman daripada default RANGE.
+s17:
+  - Kalau hanya mengambil tanggal yang ada penjualan, hari kosong tidak tercatat dan rata-rata jadi salah.
+  - Buat deret tanggal lengkap (date spine) dengan generate_series atau range, lalu LEFT JOIN ke revenue harian.
+  - "AVG(...) OVER (ORDER BY order_date ROWS BETWEEN 6 PRECEDING AND CURRENT ROW) setelah hari kosong diisi 0."
+s18:
+  - Ini soal klasik gaps and islands. Kerjakan dari daftar tanggal unik per distributor.
+  - Kalau tanggal dikurangi ROW_NUMBER, tanggal yang berurutan menghasilkan nilai yang sama.
+  - GROUP BY distributor_id dan nilai hasil pengurangan itu, hitung panjang, lalu ambil yang terpanjang (tie-break streak_start).
+s19:
+  - Jangan JOIN di level baris. Ringkas tiap tabel per order_date dulu.
+  - Tanggal bisa hanya ada di satu sisi. JOIN jenis apa yang mempertahankan kedua sisi?
+  - COALESCE(s.order_date, t.order_date) dan COALESCE(..., 0) untuk sisi yang kosong. Status pakai CASE WHEN.
+s20:
+  - MERGE INTO target USING source ON key, lalu beberapa klausa WHEN.
+  - Urutan WHEN penting. Klausa WHEN MATCHED AND kondisi THEN ... bisa ditulis lebih dari sekali.
+  - "Butuh tiga klausa: MATCHED + op hapus -> DELETE, MATCHED + data lebih baru -> UPDATE, NOT MATCHED + bukan hapus -> INSERT."
+s21:
+  - Bandingkan snapshot dengan baris current di dimensi. Kelompokkan setiap distributor ke kategori (baru, berubah Type 2, berubah nama saja, sama).
+  - Perbandingan "a <> b" bernilai NULL kalau salah satu NULL. Gunakan IS DISTINCT FROM.
+  - "Urutan aman: simpan hasil perbandingan di TEMP TABLE, UPDATE nama (Type 1), UPDATE tutup baris lama, INSERT baris baru, DROP temp table."
+s22:
+  - Region distributor bisa berubah. Region mana yang berlaku pada tanggal order?
+  - JOIN ke dimensi historis memakai distributor_id DAN rentang tanggal.
+  - "Kondisi: order_date >= valid_from AND order_date < valid_to (valid_to eksklusif)."
+s23:
+  - Total per order dibutuhkan dua kali (untuk baris dan untuk rata-rata). Hitung sekali di CTE.
+  - Rata-rata per distributor bisa didapat tanpa GROUP BY terpisah memakai AVG(...) OVER (PARTITION BY ...).
+  - Hasil harus identik dengan query asli. Perhatikan bagaimana query asli memperlakukan distributor_id NULL.
+s24:
+  - DISTINCT + window = GROUP BY biasa yang menyamar.
+  - Filter tahun bisa ditulis sebagai rentang order_date >= ... AND order_date < ... tanpa fungsi.
+  - order_items_clean.product_code sudah bersih, jadi JOIN langsung dengan "=" saja. strftime boleh tetap di SELECT dan GROUP BY.
+s25:
+  - Semua subquery memakai JOIN dan filter dasar yang sama. Yang beda hanya rentang tanggal dan fungsi agregasinya.
+  - Satu scan dengan rentang 2024 sampai 2025, lalu setiap kolom memakai FILTER (WHERE ...).
+  - COUNT(DISTINCT ...) FILTER (...) dan AVG(...) FILTER (...) juga valid. Pertahankan LEFT JOIN dari daftar segment.

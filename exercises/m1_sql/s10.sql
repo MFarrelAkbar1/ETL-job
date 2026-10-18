@@ -1,0 +1,23 @@
+-- ==========================================================================
+-- S10 | Parsing tanggal dengan format campur
+-- Tingkat: SEDANG | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Kolom orders.order_date bertipe VARCHAR dengan tiga format: 'YYYY-MM-DD', 'DD/MM/YYYY',
+--   dan 'DD-Mon-YYYY' (contoh '14-Mar-2025'). Ada juga nilai NULL dan nilai rusak.
+--   Hitung jumlah order UNIK (order_id) per bulan. Order yang tanggalnya tidak bisa di-parse
+--   dikumpulkan dalam satu baris dengan order_month = NULL.
+--
+-- Tabel        : orders (MENTAH)
+-- Kolom output : order_month (DATE, tanggal 1 di bulan tsb), n_orders
+-- Urutan baris : order_month ASC, baris NULL paling akhir
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s10
+-- Petunjuk     : task hint -- s10   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

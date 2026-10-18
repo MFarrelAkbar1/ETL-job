@@ -1,0 +1,13 @@
+# Petunjuk bertahap Modul 8.
+dag01:
+  - Mulai dari "with DAG(dag_id=..., schedule=..., start_date=..., catchup=..., default_args=..., tags=...) as dag:".
+  - default_args adalah dict biasa. retry_delay berupa timedelta(minutes=5).
+  - Definisikan tiga fungsi di level modul, buat tiga PythonOperator, lalu satu baris a >> b >> c.
+dag02:
+  - Fan-out dan fan-in bisa ditulis dalam satu baris memakai list, start >> [a, b, c] >> merge.
+  - max_active_runs adalah argumen DAG, sedangkan pool adalah argumen task.
+  - Template Jinja "{{ ds }}" di op_kwargs dirender Airflow per DAG run, jadi setiap tanggal backfill memproses datanya sendiri.
+dag03:
+  - FileSensor punya argumen filepath, mode, poke_interval, dan timeout (dalam detik).
+  - Argumen di task (misalnya retries=0) menimpa nilai default_args.
+  - trigger_rule="one_failed" membuat task jalan saat ada upstream langsung yang gagal. Upstream notify_failure ada dua.

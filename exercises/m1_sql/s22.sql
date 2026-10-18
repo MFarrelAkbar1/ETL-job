@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S22 | Point-in-time join ke dimensi SCD2
+-- Tingkat: SULIT | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   dim_distributor_hist menyimpan riwayat region distributor (SCD Type 2, valid_to
+--   eksklusif). Hitung revenue per region per tahun (2024 dan 2025) memakai region distributor
+--   PADA SAAT order terjadi, bukan region saat ini. Gunakan definisi revenue standar.
+--
+-- Tabel        : orders_clean, order_items_clean, dim_distributor_hist, regions
+-- Kolom output : region_id, region_name, year (INTEGER), revenue (2 desimal)
+-- Urutan baris : year ASC, region_id ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s22
+-- Petunjuk     : task hint -- s22   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S14 | LAG: pertumbuhan bulan ke bulan
+-- Tingkat: SEDANG | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Hitung revenue bulanan per segment (dari products) untuk 2024 dan 2025, lalu bandingkan
+--   dengan bulan sebelumnya di segment yang sama. Bulan pertama tiap segment punya prev_revenue
+--   dan mom_pct NULL. mom_pct = (revenue - prev_revenue) / prev_revenue * 100.
+--
+-- Tabel        : orders_clean, order_items_clean, products
+-- Kolom output : segment, month (DATE tanggal 1), revenue, prev_revenue, mom_pct (angka dibulatkan 2 desimal)
+-- Urutan baris : segment ASC, month ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s14
+-- Petunjuk     : task hint -- s14   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

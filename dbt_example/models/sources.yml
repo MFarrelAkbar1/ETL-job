@@ -1,0 +1,22 @@
+version: 2
+
+sources:
+  - name: raw
+    database: wh
+    schema: main
+    description: Tabel mentah (kotor) hasil data/generate.py
+    tables:
+      - name: orders
+      - name: order_items
+      - name: products
+        columns:
+          - name: product_code
+            data_tests:
+              - unique
+              - not_null
+      - name: distributors
+        columns:
+          - name: distributor_id
+            data_tests:
+              - unique
+              - not_null

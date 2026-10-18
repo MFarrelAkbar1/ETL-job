@@ -1,0 +1,23 @@
+-- ==========================================================================
+-- S11 | ROW_NUMBER vs RANK vs DENSE_RANK
+-- Tingkat: SEDANG | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Di setiap category, ranking produk berdasarkan unit_price dari yang termahal.
+--   Tampilkan ketiga jenis ranking: rn (ROW_NUMBER, kalau seri pakai product_code ASC),
+--   rnk (RANK), dan drnk (DENSE_RANK). Hanya tampilkan baris dengan drnk <= 5.
+--   Perhatikan perbedaan ketiganya pada produk dengan harga sama.
+--
+-- Tabel        : products
+-- Kolom output : category, product_code, unit_price, rn, rnk, drnk
+-- Urutan baris : category ASC, rn ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s11
+-- Petunjuk     : task hint -- s11   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

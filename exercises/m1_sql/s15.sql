@@ -1,0 +1,23 @@
+-- ==========================================================================
+-- S15 | LEAD: jarak ke order berikutnya
+-- Tingkat: SEDANG | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Untuk setiap distributor yang ada di master, ambil daftar TANGGAL UNIK ia melakukan
+--   order (semua status) di tahun 2025. Untuk setiap tanggal, cari tanggal order berikutnya
+--   (masih di 2025) dan selisih harinya. Tampilkan hanya jeda (gap) minimal 21 hari, yaitu
+--   distributor yang lama tidak order. Kalau satu hari ada beberapa order, hitung sebagai satu tanggal.
+--
+-- Tabel        : orders_clean, distributors
+-- Kolom output : distributor_id, order_date, next_order_date, gap_days (INTEGER)
+-- Urutan baris : distributor_id ASC, order_date ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s15
+-- Petunjuk     : task hint -- s15   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

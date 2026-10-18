@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S13 | Deduplikasi: ambil baris terbaru
+-- Tingkat: SEDANG | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Tabel MENTAH orders punya order_id duplikat: sistem sumber mengirim beberapa versi
+--   dari order yang sama, dan ada juga baris yang terkirim dua kali persis sama. Ambil SATU baris
+--   per order_id, yaitu versi dengan updated_at paling baru. Hasil harus tepat satu baris per order_id.
+--
+-- Tabel        : orders (MENTAH)
+-- Kolom output : order_id, order_date, distributor_id, status, channel, updated_at
+-- Urutan baris : order_id ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s13
+-- Petunjuk     : task hint -- s13   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

@@ -1,0 +1,41 @@
+-- ==========================================================================
+-- S23 | Query lambat 1: correlated subquery
+-- Tingkat: SULIT | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Query di bawah mencari order COMPLETED tahun 2025 yang nilainya lebih dari 2 kali
+--   rata-rata nilai order distributor yang sama. Hasilnya benar, tetapi lambat karena subquery
+--   dihitung ulang per baris dan order_items_clean di-scan berkali-kali.
+--
+--       SELECT o.order_id, o.distributor_id, t.order_total
+--       FROM orders_clean o
+--       JOIN (SELECT order_id, SUM(line_amount) AS order_total
+--             FROM order_items_clean GROUP BY order_id) t USING (order_id)
+--       WHERE o.status = 'COMPLETED'
+--         AND o.order_date BETWEEN DATE '2025-01-01' AND DATE '2025-12-31'
+--         AND t.order_total > (
+--             SELECT 2 * AVG(t2.order_total)
+--             FROM orders_clean o2
+--             JOIN (SELECT order_id, SUM(line_amount) AS order_total
+--                   FROM order_items_clean GROUP BY order_id) t2 USING (order_id)
+--             WHERE o2.distributor_id = o.distributor_id
+--               AND o2.status = 'COMPLETED'
+--               AND o2.order_date BETWEEN DATE '2025-01-01' AND DATE '2025-12-31')
+--       ORDER BY o.distributor_id, o.order_id;
+--
+--   Tulis ulang supaya: tidak ada subquery di WHERE atau SELECT, dan order_items_clean
+--   hanya disebut SATU kali. Hasil harus identik.
+--
+-- Tabel        : orders_clean, order_items_clean
+-- Kolom output : order_id, distributor_id, order_total
+-- Urutan baris : distributor_id ASC, order_id ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s23
+-- Petunjuk     : task hint -- s23   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

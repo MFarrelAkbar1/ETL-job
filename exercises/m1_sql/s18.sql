@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S18 | Gaps and islands: streak terpanjang
+-- Tingkat: SULIT | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Untuk setiap distributor di master, cari streak terpanjang hari BERTURUT-TURUT dengan
+--   minimal 1 order (semua status) di tahun 2025. Kalau ada beberapa streak dengan panjang sama,
+--   ambil yang paling awal. Distributor tanpa order 2025 tidak ditampilkan.
+--
+-- Tabel        : orders_clean, distributors
+-- Kolom output : distributor_id, longest_streak_days, streak_start, streak_end
+-- Urutan baris : longest_streak_days DESC, distributor_id ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s18
+-- Petunjuk     : task hint -- s18   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

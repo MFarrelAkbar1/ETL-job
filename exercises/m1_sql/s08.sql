@@ -1,0 +1,21 @@
+-- ==========================================================================
+-- S08 | Agregasi kondisional (pivot)
+-- Tingkat: SEDANG | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Buat tabel pivot revenue tahun 2025 per category (dari products) per kuartal.
+--   Gunakan definisi revenue standar. Kuartal tanpa penjualan bernilai 0.
+--
+-- Tabel        : orders_clean, order_items_clean, products
+-- Kolom output : category, q1, q2, q3, q4, total (semua dibulatkan 2 desimal)
+-- Urutan baris : total DESC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s08
+-- Petunjuk     : task hint -- s08   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

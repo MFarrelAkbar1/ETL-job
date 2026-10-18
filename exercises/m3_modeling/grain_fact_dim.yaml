@@ -1,0 +1,145 @@
+# =============================================================================
+# Latihan Modul 3: menentukan GRAIN, jenis FACT, ADDITIVITY measure, dan DIMENSION
+# Uji: task test-modeling        Petunjuk: task hint -- g01   (g01 sampai g08)
+# =============================================================================
+#
+# Cara mengisi: ganti setiap "~" dengan jawaban Anda.
+#
+#   grain       : huruf pilihan (a / b / c / d)
+#   fact_type   : transaction | periodic_snapshot | accumulating_snapshot | factless
+#   measures    : untuk setiap measure tulis additive | semi_additive | non_additive
+#                   additive      = boleh dijumlah di semua dimensi
+#                   semi_additive = boleh dijumlah di sebagian dimensi (biasanya TIDAK antar waktu)
+#                   non_additive  = tidak boleh dijumlah sama sekali (rasio, persen, harga satuan)
+#   dimensions  : list nama dimensi yang COCOK dengan grain, pilih dari daftar berikut:
+#                   tanggal, bulan, produk, kategori_produk, batch, distributor, region,
+#                   sales_rep, gudang, outlet_apotek, promosi, alasan_retur
+#                 Contoh: dimensions: [tanggal, produk]
+#
+# Aturan dimensi: pilih semua dimensi yang WAJIB untuk menjawab kebutuhan, dan jangan pilih
+# dimensi yang levelnya tidak cocok dengan grain (misalnya dimensi harian di fact bulanan).
+# Dimensi opsional yang masuk akal tidak membuat jawaban salah.
+# =============================================================================
+
+g01:
+  # SKENARIO: Tim sales ingin menganalisis penjualan per produk, per distributor, per hari,
+  # sampai bisa melihat isi setiap order (produk apa saja dan berapa banyak).
+  # Pilihan grain:
+  #   a) satu baris per order
+  #   b) satu baris per item produk di dalam order
+  #   c) satu baris per produk per hari
+  #   d) satu baris per distributor per bulan
+  grain: ~
+  fact_type: ~
+  measures:
+    quantity: ~
+    line_amount: ~
+    unit_price: ~
+  dimensions: []
+
+g02:
+  # SKENARIO: Tim gudang ingin tahu posisi stok setiap produk di setiap gudang pada AKHIR
+  # setiap hari, dan tren stok dari waktu ke waktu.
+  # Pilihan grain:
+  #   a) satu baris per pergerakan stok (masuk/keluar)
+  #   b) satu baris per produk per gudang per hari
+  #   c) satu baris per gudang per bulan
+  #   d) satu baris per produk
+  grain: ~
+  fact_type: ~
+  measures:
+    stok_akhir: ~
+    nilai_stok: ~
+    qty_masuk_hari_ini: ~
+  dimensions: []
+
+g03:
+  # SKENARIO: Manajemen ingin memantau perjalanan setiap order: dibuat, disetujui, dipick,
+  # dikirim, diterima. Setiap tahap punya tanggal, dan baris order DIPERBARUI saat tahap
+  # berikutnya tercapai. Pertanyaan utama: berapa lama tiap tahap.
+  # Pilihan grain:
+  #   a) satu baris per order, diperbarui setiap kali milestone tercapai
+  #   b) satu baris per kejadian perubahan status
+  #   c) satu baris per hari
+  #   d) satu baris per item order
+  grain: ~
+  fact_type: ~
+  measures:
+    qty_dipesan: ~
+    qty_dikirim: ~
+    fill_rate_pct: ~
+  dimensions: []
+
+g04:
+  # SKENARIO: Sales rep mengunjungi apotek. Tidak ada angka yang dicatat, hanya fakta bahwa
+  # kunjungan terjadi. Pertanyaan: apotek mana yang tidak dikunjungi bulan ini?
+  # Pilihan grain:
+  #   a) satu baris per kunjungan (sales rep, apotek, tanggal)
+  #   b) satu baris per sales rep per bulan
+  #   c) satu baris per apotek
+  #   d) satu baris per order yang dihasilkan kunjungan
+  grain: ~
+  fact_type: ~
+  measures: {}   # biarkan kosong kalau menurut Anda tidak ada measure
+  dimensions: []
+
+g05:
+  # SKENARIO: Finance menetapkan target penjualan setiap sales rep untuk setiap KATEGORI
+  # produk setiap BULAN. Target tidak ditetapkan per produk atau per hari.
+  # Pilihan grain:
+  #   a) satu baris per sales rep per produk per hari
+  #   b) satu baris per sales rep per kategori produk per bulan
+  #   c) satu baris per sales rep per tahun
+  #   d) satu baris per kategori produk
+  grain: ~
+  fact_type: ~
+  measures:
+    target_amount: ~
+  dimensions: []
+
+g06:
+  # SKENARIO: Finance ingin posisi saldo piutang setiap distributor pada akhir setiap bulan,
+  # beserta pembayaran yang diterima selama bulan itu dan rata-rata umur piutang.
+  # Pilihan grain:
+  #   a) satu baris per invoice
+  #   b) satu baris per distributor per bulan
+  #   c) satu baris per pembayaran
+  #   d) satu baris per region per tahun
+  grain: ~
+  fact_type: ~
+  measures:
+    saldo_piutang: ~
+    pembayaran_bulan_ini: ~
+    umur_piutang_rata_hari: ~
+  dimensions: []
+
+g07:
+  # SKENARIO: Tim quality ingin menganalisis retur: produk apa, dari distributor mana,
+  # alasan apa, kapan, berapa yang dikembalikan, dan berapa uang yang direfund.
+  # Pilihan grain:
+  #   a) satu baris per item yang diretur
+  #   b) satu baris per order
+  #   c) satu baris per hari
+  #   d) satu baris per alasan retur
+  grain: ~
+  fact_type: ~
+  measures:
+    return_qty: ~
+    refund_amount: ~
+    return_rate_pct: ~
+  dimensions: []
+
+g08:
+  # SKENARIO: Tentukan tipe SCD untuk atribut dim_distributor. Isi dengan angka 0, 1, 2, atau 3.
+  #   0 = tidak pernah berubah, 1 = timpa (tanpa histori), 2 = baris baru per versi,
+  #   3 = simpan nilai sebelumnya di kolom tambahan
+  # - region_id          : laporan historis harus mengikuti region SAAT transaksi terjadi
+  # - nomor_telepon      : sering salah ketik, cukup dikoreksi, histori tidak dibutuhkan
+  # - segmen_distributor : marketing ingin membandingkan segmen lama dan segmen baru secara
+  #                        berdampingan, cukup SATU perubahan terakhir
+  # - tanggal_onboarding : tanggal pertama kali kerja sama, tidak boleh berubah
+  scd:
+    region_id: ~
+    nomor_telepon: ~
+    segmen_distributor: ~
+    tanggal_onboarding: ~

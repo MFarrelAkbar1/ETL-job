@@ -1,0 +1,37 @@
+-- ==========================================================================
+-- S24 | Query lambat 2: DISTINCT penambal dan filter non-sargable
+-- Tingkat: SULIT | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Query di bawah menghasilkan revenue per region, segment, dan bulan untuk 2025.
+--   Hasilnya benar, tetapi penuh anti-pattern.
+--
+--       SELECT DISTINCT r.region_name, p.segment, strftime(o.order_date, '%Y-%m') AS month,
+--              SUM(oi.line_amount) OVER (
+--                  PARTITION BY r.region_name, p.segment, strftime(o.order_date, '%Y-%m')) AS revenue
+--       FROM (SELECT * FROM order_items_clean ORDER BY order_item_id) oi
+--       JOIN (SELECT * FROM orders_clean ORDER BY order_date) o ON o.order_id = oi.order_id
+--       JOIN products p ON upper(trim(p.product_code)) = upper(trim(oi.product_code))
+--       JOIN distributors d ON d.distributor_id = o.distributor_id
+--       JOIN regions r ON r.region_id = d.region_id
+--       WHERE o.status = 'COMPLETED' AND strftime(o.order_date, '%Y') = '2025'
+--       ORDER BY 1, 2, 3;
+--
+--   Tulis ulang dengan aturan: tanpa SELECT DISTINCT, tanpa window function, tanpa ORDER BY di
+--   dalam subquery, tanpa fungsi yang membungkus order_date di WHERE (filter harus sargable,
+--   bisa dipakai untuk partition pruning), dan tanpa fungsi di kondisi JOIN ON
+--   (order_items_clean.product_code sudah bersih). Hasil harus identik.
+--
+-- Tabel        : orders_clean, order_items_clean, products, distributors, regions
+-- Kolom output : region_name, segment, month (VARCHAR 'YYYY-MM'), revenue
+-- Urutan baris : region_name ASC, segment ASC, month ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s24
+-- Petunjuk     : task hint -- s24   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

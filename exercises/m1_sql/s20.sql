@@ -1,0 +1,27 @@
+-- ==========================================================================
+-- S20 | MERGE / upsert ke dimensi
+-- Tingkat: SULIT | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Tulis statement (boleh MERGE INTO, atau kombinasi UPDATE/INSERT/DELETE) yang menerapkan
+--   batch product_updates ke dim_product dengan aturan:
+--     1. op = 'D' dan product_id ada di target: hapus baris tersebut.
+--     2. op = 'D' tapi product_id tidak ada di target: abaikan.
+--     3. product_id sudah ada dan op <> 'D': update product_code, product_name, category,
+--        unit_price, is_active, updated_at, TETAPI hanya kalau updated_at di batch lebih baru dari
+--        updated_at di target (lindungi dari data basi).
+--     4. product_id belum ada dan op <> 'D': insert baris baru.
+--   Statement Anda harus idempotent: dijalankan dua kali hasilnya sama.
+--   Yang dinilai adalah isi akhir tabel dim_product.
+--
+-- Tabel        : dim_product (target), product_updates (batch)
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s20
+-- Petunjuk     : task hint -- s20   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

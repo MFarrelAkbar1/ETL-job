@@ -1,0 +1,24 @@
+-- ==========================================================================
+-- S17 | Moving average 7 hari dengan date spine
+-- Tingkat: SULIT | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Untuk distributor 'D007', tampilkan revenue harian dan moving average 7 hari
+--   (hari ini dan 6 hari sebelumnya) untuk SETIAP tanggal 2025-01-01 sampai 2025-03-31.
+--   Hari tanpa penjualan tetap tampil dengan daily_revenue = 0 dan ikut dihitung dalam rata-rata.
+--   Untuk 6 hari pertama, rata-rata dihitung dari hari yang tersedia mulai 1 Januari saja.
+--   Petunjuk umum: distributor ini tidak order setiap hari.
+--
+-- Tabel        : orders_clean, order_items_clean
+-- Kolom output : order_date, daily_revenue, ma_7d (2 desimal)
+-- Urutan baris : order_date ASC (harus tepat 90 baris)
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s17
+-- Petunjuk     : task hint -- s17   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

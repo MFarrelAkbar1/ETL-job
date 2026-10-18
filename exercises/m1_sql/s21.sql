@@ -1,0 +1,32 @@
+-- ==========================================================================
+-- S21 | SCD Type 2
+-- Tingkat: SULIT | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Terapkan distributor_snapshot (kondisi per 2025-07-01) ke dim_distributor_scd2.
+--   Konvensi: valid_to EKSKLUSIF, baris aktif punya valid_to = DATE '9999-12-31' dan is_current = TRUE.
+--   Aturan:
+--     1. Atribut SCD Type 2: region_id, city, address. Kalau salah satu berubah (termasuk dari
+--        NULL ke ada isi), tutup baris lama (valid_to = DATE '2025-07-01', is_current = FALSE) dan
+--        buat baris baru (valid_from = DATE '2025-07-01').
+--     2. distributor_name adalah SCD Type 1: kalau HANYA nama yang berubah, timpa nama di baris
+--        current saja, tanpa versi baru. Kalau nama dan atribut Type 2 berubah bersamaan, baris
+--        lama tetap memakai nama lama dan baris baru memakai nama baru.
+--     3. Distributor baru (belum ada di dimensi): insert dengan valid_from = DATE '2025-07-01'.
+--     4. Distributor yang tidak muncul di snapshot: JANGAN diubah.
+--     5. distributor_sk baru = MAX(distributor_sk) yang ada + ROW_NUMBER() urut distributor_id.
+--        (Nilai sk tidak dibandingkan persis, tetapi harus unik dan tidak NULL.)
+--   Statement Anda harus idempotent: dijalankan dua kali dengan snapshot yang sama, hasilnya sama.
+--   Yang dinilai adalah isi akhir tabel dim_distributor_scd2.
+--
+-- Tabel        : dim_distributor_scd2 (target), distributor_snapshot (snapshot per 2025-07-01)
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s21
+-- Petunjuk     : task hint -- s21   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

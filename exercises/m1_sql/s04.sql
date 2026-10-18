@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S04 | GROUP BY dan HAVING
+-- Tingkat: MUDAH | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Cari distributor (distributor_id tidak NULL) yang pada tahun 2025 memenuhi DUA syarat
+--   sekaligus: revenue minimal 1.500.000.000 DAN minimal 300 order. Gunakan definisi revenue
+--   standar; order yang dihitung juga hanya yang COMPLETED.
+--
+-- Tabel        : orders_clean, order_items_clean
+-- Kolom output : distributor_id, n_orders, revenue (dibulatkan 2 desimal)
+-- Urutan baris : revenue DESC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s04
+-- Petunjuk     : task hint -- s04   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

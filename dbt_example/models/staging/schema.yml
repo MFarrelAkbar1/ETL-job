@@ -1,0 +1,48 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: Order unik, versi terbaru
+    columns:
+      - name: order_id
+        data_tests:
+          - unique
+          - not_null
+      - name: status
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ["COMPLETED", "CANCELLED", "PENDING"]
+      - name: order_date
+        data_tests:
+          - not_null:
+              config:
+                severity: warn   # 250 order punya tanggal rusak; ditandai, tidak memblokir
+      - name: distributor_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: source('raw', 'distributors')
+                field: distributor_id
+              config:
+                severity: warn   # orphan diketahui; ganti ke error untuk latihan nomor 2
+
+  - name: stg_order_items
+    description: Item order dengan product_code yang sudah dinormalisasi
+    columns:
+      - name: order_item_id
+        data_tests:
+          - unique
+          - not_null
+      - name: product_code
+        data_tests:
+          - relationships:
+              arguments:
+                to: source('raw', 'products')
+                field: product_code
+      - name: order_id
+        data_tests:
+          - relationships:
+              arguments:
+                to: ref('stg_orders')
+                field: order_id

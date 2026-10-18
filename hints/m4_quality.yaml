@@ -1,0 +1,33 @@
+# Petunjuk bertahap Modul 4.
+dq01:
+  - isna() saja tidak menangkap string kosong atau string berisi spasi.
+  - Buat mask gabungan, isna() OR (nilai berupa string dan strip() == "").
+  - Hati-hati dengan .str pada kolom campur tipe. Pakai .map(lambda v: isinstance(v, str) and v.strip() == "").
+dq02:
+  - duplicated() default hanya menandai kemunculan kedua dan seterusnya.
+  - duplicated(keep=False) menandai semua anggota duplikat. Pisahkan dulu baris dengan key NULL.
+  - Untuk sample, ambil key duplikat unik (drop_duplicates), ubah setiap baris jadi tuple, urutkan, ambil 5.
+dq03:
+  - Semua fungsi mulai dari df[col].dropna(), supaya NULL tidak ikut dinilai.
+  - pd.to_numeric(..., errors="coerce") mengubah teks yang bukan angka menjadi NaN, dan NaN itu dihitung gagal.
+  - Untuk regex, re.fullmatch memastikan seluruh string cocok. re.match hanya mengecek awal string.
+dq04:
+  - Anti join versi pandas adalah ~isin(set nilai parent).
+  - Pisahkan tiga kelompok, NULL, orphan, dan valid. allow_null hanya menentukan apakah NULL ikut gagal.
+  - orphan_values diambil dari nilai unik baris orphan, lalu sorted() dan [:20].
+dq05:
+  - pd.to_datetime(..., errors="coerce") lalu max() mengabaikan NaT.
+  - Selisih now - latest berupa Timedelta, bisa dibandingkan langsung dengan max_age.
+  - Untuk volume, statistics.median menghindari pengaruh satu hari yang anomali.
+dq06:
+  - Agregasikan per key di kedua sisi dulu (groupby + sum), baru gabungkan.
+  - merge(how="outer", indicator=True) memberi kolom _merge berisi left_only, right_only, both.
+  - np.select dengan tiga kondisi untuk status, lalu buang baris yang statusnya kosong (cocok).
+dq07:
+  - Buat fungsi kecil yang menerima satu rule dan mengembalikan CheckResult dari fungsi DQ01 sampai DQ04.
+  - Gunakan if/elif berdasarkan rule["check"] (atau dict dispatch). rule.get("severity", "error") untuk default.
+  - should_block, cari baris yang passed False dan severity "error", lalu .any().
+dq08:
+  - Baca CSV dengan dtype=str, keep_default_na=False, na_values=[""].
+  - Kolom order_date_valid dibuat dengan mencoba tiga format seperti P03, lalu notna() dipetakan ke 'Y'/'N'.
+  - Setelah dict tabel siap, cukup panggil run_suite(tables, RULES) dari DQ07.

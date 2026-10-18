@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S02 | INNER JOIN dan agregasi
+-- Tingkat: MUDAH | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Untuk setiap distributor yang ADA di master distributors, hitung jumlah order dan
+--   revenue selama tahun 2025 (berdasarkan order_date). Gunakan definisi revenue standar.
+--   Distributor tanpa order 2025 tidak perlu ditampilkan.
+--
+-- Tabel        : orders_clean, order_items_clean, distributors
+-- Kolom output : distributor_id, distributor_name, n_orders, revenue (dibulatkan 2 desimal)
+-- Urutan baris : revenue DESC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s02
+-- Petunjuk     : task hint -- s02   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

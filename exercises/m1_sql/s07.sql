@@ -1,0 +1,23 @@
+-- ==========================================================================
+-- S07 | Normalisasi key sebelum JOIN
+-- Tingkat: SEDANG | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Gunakan tabel MENTAH order_items. Kolom product_code di sana kotor: ada huruf kecil
+--   dan spasi di depan atau belakang. Untuk setiap produk segment 'Farmasi', hitung total
+--   quantity dan jumlah baris item (semua status order, quantity NULL diabaikan saat SUM tetapi
+--   barisnya tetap dihitung di n_lines). Jangan sampai ada baris yang hilang karena beda format kode.
+--
+-- Tabel        : order_items (MENTAH), products
+-- Kolom output : product_code (format master), product_name, total_qty, n_lines
+-- Urutan baris : total_qty DESC, lalu product_code ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s07
+-- Petunjuk     : task hint -- s07   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

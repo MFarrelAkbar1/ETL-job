@@ -1,0 +1,53 @@
+# Petunjuk bertahap Modul 3.
+g01:
+  - Pertanyaan "isi setiap order" menentukan seberapa detail grain-nya.
+  - Kimball menyarankan grain paling atomik untuk transaction fact. Harga satuan adalah rasio (uang per unit).
+  - Dimensi wajib ada tiga. Dimensi bulanan tidak cocok untuk grain harian/per item.
+g02:
+  - Posisi stok diukur pada titik waktu, bukan kejadian.
+  - Ukuran posisi (saldo, stok) berbeda perilakunya dengan ukuran arus (masuk, keluar) saat dijumlah antar waktu.
+  - Stok gudang tidak berkaitan langsung dengan distributor atau sales rep.
+g03:
+  - Baris diperbarui seiring proses berjalan. Itu ciri jenis fact tertentu.
+  - Ada tiga jenis fact selain transaction. Mana yang punya banyak kolom tanggal milestone?
+  - Persentase selalu dihitung ulang dari komponennya, tidak dijumlah.
+g04:
+  - Tidak ada angka yang diukur. Fact tetap bisa ada tanpa measure.
+  - Fact jenis ini sering dipakai untuk pertanyaan "apa yang TIDAK terjadi" lewat anti join.
+  - Kunjungan tidak terjadi per produk.
+g05:
+  - Target ditetapkan di level kategori dan bulan. Grain fact mengikuti level penetapan target.
+  - Dimensi produk (per SKU) dan tanggal harian terlalu detail untuk grain ini (gunakan shrunken dimension).
+  - Total target beberapa bulan masih bermakna (target kuartal = jumlah target bulanan).
+g06:
+  - Ada tiga measure dengan tiga sifat berbeda.
+  - Saldo adalah posisi, pembayaran adalah arus, rata-rata adalah rasio.
+  - Dimensi wajib ada dua, dan keduanya berlevel bulanan/distributor.
+g07:
+  - Retur adalah kejadian bisnis yang tercatat per item.
+  - Rasio retur adalah turunan dari dua angka.
+  - Dimensi wajib ada empat, termasuk alasan retur.
+g08:
+  - Type 2 menjaga histori lengkap, Type 1 menimpa, Type 3 menambah kolom nilai sebelumnya, Type 0 tidak berubah.
+  - Kebutuhan "mengikuti kondisi saat transaksi" butuh histori lengkap.
+  - Kebutuhan "lama vs baru berdampingan, satu perubahan" cocok dengan kolom tambahan.
+k01:
+  - Mulai dari layer (raw, staging, mart), lalu baru pilih metode ekstraksi per layer.
+  - Kalau timestamp sumber tidak bisa dipercaya, pikirkan CDC berbasis log atau menarik ulang jendela beberapa hari terakhir.
+  - Tulis natural key gabungan (cabang + order_id + line) dan jelaskan bagaimana MERGE membuat rerun aman.
+k02:
+  - Jangan langsung rerun. Cari tahu apa yang berubah sejak run terakhir yang sukses.
+  - Retry hanya menolong error transien. Error constraint bersifat deterministik.
+  - Bahas dedup staging + MERGE, keputusan menunda dashboard, dan isi pesan ke stakeholder.
+k03:
+  - Dua angka bisa sama-sama benar untuk definisi berbeda. Daftar definisinya dulu.
+  - Rekonsiliasi dari level total turun ke level dokumen, lalu kelompokkan selisih per penyebab.
+  - FULL OUTER JOIN setelah agregasi per sisi, dengan kategori ONLY_DWH, ONLY_ERP, AMOUNT_DIFF.
+k04:
+  - Setiap pertanyaan bisnis di konteks biasanya menunjuk ke satu jenis fact.
+  - Ada transaction, periodic snapshot, accumulating snapshot, dan factless di kasus ini.
+  - Bandingkan target dan aktual dengan drill-across setelah keduanya berada di grain yang sama.
+k05:
+  - Tanyakan dulu keputusan apa yang diambil dari data stok dan berapa latensi yang benar-benar dibutuhkan.
+  - CDC + MERGE idempotent + checkpoint. Jangan lupa compaction dan expire snapshot.
+  - Data kesehatan adalah data pribadi spesifik di UU PDP. Bahas dasar pemrosesan, DPIA, masking, RLS, dan notifikasi 3 x 24 jam.

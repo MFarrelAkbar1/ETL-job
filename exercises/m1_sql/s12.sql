@@ -1,0 +1,21 @@
+-- ==========================================================================
+-- S12 | Top N per grup
+-- Tingkat: SEDANG | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Cari 3 produk dengan revenue tertinggi di setiap category untuk tahun 2025.
+--   Gunakan definisi revenue standar.
+--
+-- Tabel        : orders_clean, order_items_clean, products
+-- Kolom output : category, rank_in_category (1 sampai 3), product_code, product_name, revenue (2 desimal)
+-- Urutan baris : category ASC, rank_in_category ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s12
+-- Petunjuk     : task hint -- s12   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

@@ -1,0 +1,29 @@
+# Petunjuk bertahap Modul 6.
+ice01:
+  - Catalog punya method create_namespace_if_not_exists dan create_table_if_not_exists.
+  - Schema dibuat dari NestedField(field_id, nama, tipe, required=...). Field id harus sesuai soal.
+  - PartitionSpec(PartitionField(source_id=2, field_id=1000, transform=DayTransform(), name="order_day")).
+ice02:
+  - Untuk read_orders, pakai duckdb.connect(..., read_only=True) dan CAST(order_date AS TIMESTAMP).
+  - table.schema().as_arrow() memberi schema Arrow yang cocok dengan tabel, termasuk nullability.
+  - Lengkapi kolom yang hilang dengan None, urutkan kolom sesuai schema, lalu pa.Table.from_pandas(df, schema=..., preserve_index=False).
+ice03:
+  - Cek dulu apakah nama kolom sudah ada di table.schema().fields.
+  - with table.update_schema() as u, lalu u.add_column(nama, tipe, doc=doc).
+  - Commit terjadi saat keluar dari blok with, dan objek table ikut ter-update.
+ice04:
+  - table.snapshots() mengembalikan list Snapshot. Lihat atribut snapshot_id, parent_snapshot_id, timestamp_ms, summary.
+  - summary.operation.value memberi 'append'. summary.get("added-records") mengembalikan string.
+  - pd.to_datetime(timestamp_ms, unit="ms"), dan pd.DataFrame(rows, columns=COLUMNS) supaya hasil kosong tetap punya kolom.
+ice05:
+  - table.scan(snapshot_id=...).to_pandas() membaca isi tabel pada snapshot itu.
+  - Ubah ts ke milidetik epoch (anggap UTC), lalu cari snapshot dengan timestamp_ms <= nilai itu.
+  - Untuk diff, baca kedua snapshot lalu pakai ~isin pada order_id.
+ice06:
+  - Filter kolom asli order_ts, bukan order_day. Iceberg menerjemahkan ke filter partisi.
+  - Pakai batas atas eksklusif di hari setelah end supaya jam 23:00 tetap ikut.
+  - len(list(table.scan(row_filter=...).plan_files())) memberi jumlah file yang akan dibaca.
+ice07:
+  - json.loads(Path(table.metadata_location).read_text()) memberi dict metadata.
+  - Kunci yang dibutuhkan antara lain format-version, current-snapshot-id, snapshots, schemas, current-schema-id, metadata-log, partition-specs, default-spec-id.
+  - Nama kolom sumber partisi dicari dari source-id di schema terkini. Path manifest list ada di snapshot["manifest-list"].

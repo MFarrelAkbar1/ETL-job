@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S05 | Anti join: produk yang tidak pernah dipesan
+-- Tingkat: MUDAH | Prioritas: YA (sering muncul di interview)
+-- ==========================================================================
+-- SOAL
+--   Tampilkan produk di master products yang tidak pernah muncul sama sekali di
+--   order_items_clean (status order apa pun). Coba tulis dengan 2 cara (NOT EXISTS dan
+--   LEFT JOIN ... IS NULL), lalu pikirkan kenapa NOT IN berbahaya kalau kolomnya bisa NULL.
+--
+-- Tabel        : products, order_items_clean
+-- Kolom output : product_id, product_code, product_name, is_active
+-- Urutan baris : product_id ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s05
+-- Petunjuk     : task hint -- s05   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+

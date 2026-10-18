@@ -1,0 +1,102 @@
+# Kunci jawaban latihan grain/fact/dimension.
+# Struktur sama dengan file soal, ditambah:
+#   fact_type_diterima : daftar jawaban fact_type yang diterima
+#   dims_wajib         : dimensi yang harus dipilih
+#   dims_dilarang      : dimensi yang levelnya tidak cocok dengan grain
+#   alasan             : penjelasan
+
+g01:
+  grain: b
+  fact_type: transaction
+  measures: {quantity: additive, line_amount: additive, unit_price: non_additive}
+  dimensions: [tanggal, produk, distributor]
+  dims_wajib: [tanggal, produk, distributor]
+  dims_dilarang: [bulan]
+  alasan: >
+    Kebutuhan "melihat isi setiap order" menuntut grain paling atomik: satu baris per item.
+    Grain atomik selalu bisa diagregasi ke atas, tidak sebaliknya. unit_price tidak boleh
+    dijumlah (jumlah harga satuan tidak bermakna); simpan untuk dihitung rata-rata tertimbang
+    atau turunkan dari line_amount / quantity. order_id cukup sebagai degenerate dimension.
+
+g02:
+  grain: b
+  fact_type: periodic_snapshot
+  measures: {stok_akhir: semi_additive, nilai_stok: semi_additive, qty_masuk_hari_ini: additive}
+  dimensions: [tanggal, produk, gudang]
+  dims_wajib: [tanggal, produk, gudang]
+  dims_dilarang: [bulan, distributor, sales_rep]
+  alasan: >
+    Posisi stok diukur pada interval tetap, jadi periodic snapshot. Stok boleh dijumlah antar
+    gudang atau produk, tetapi TIDAK antar hari (stok Senin + stok Selasa tidak bermakna); untuk
+    periode pakai nilai akhir periode atau rata-rata. Arus (qty masuk hari ini) tetap additive.
+
+g03:
+  grain: a
+  fact_type: accumulating_snapshot
+  measures: {qty_dipesan: additive, qty_dikirim: additive, fill_rate_pct: non_additive}
+  dimensions: [tanggal, distributor, gudang]
+  dims_wajib: [tanggal, distributor, gudang]
+  dims_dilarang: [bulan]
+  alasan: >
+    Proses dengan milestone yang jelas dan baris yang diperbarui adalah accumulating snapshot.
+    Dimensi tanggal dipakai berkali-kali (role-playing: order_date, approved_date, shipped_date,
+    received_date). Persentase tidak boleh dijumlah; hitung ulang dari SUM(qty_dikirim) /
+    SUM(qty_dipesan).
+
+g04:
+  grain: a
+  fact_type: factless
+  measures: {}
+  dimensions: [tanggal, sales_rep, outlet_apotek]
+  dims_wajib: [tanggal, sales_rep, outlet_apotek]
+  dims_dilarang: [bulan, produk]
+  alasan: >
+    Factless fact table mencatat kejadian tanpa angka. Pertanyaan "apotek mana yang TIDAK
+    dikunjungi" dijawab dengan anti join dari dimensi outlet (atau tabel coverage) ke fact ini.
+    Kunjungan tidak terjadi per produk, jadi dimensi produk tidak cocok.
+
+g05:
+  grain: b
+  fact_type: periodic_snapshot
+  fact_type_diterima: [periodic_snapshot, transaction]
+  measures: {target_amount: additive}
+  dimensions: [bulan, sales_rep, kategori_produk]
+  dims_wajib: [bulan, sales_rep, kategori_produk]
+  dims_dilarang: [tanggal, produk, distributor]
+  alasan: >
+    Target ditetapkan di level kategori x bulan, sehingga fact target punya grain lebih kasar
+    daripada fact penjualan. Dimensi yang dipakai harus "shrunken dimension" (bulan, kategori),
+    bukan produk atau tanggal harian. Untuk membandingkan dengan aktual, agregasikan penjualan
+    ke grain yang sama dulu (drill-across). Kebanyakan praktisi menyebutnya periodic snapshot
+    (satu nilai per periode), sebagian menganggapnya transaction fact di grain bulanan.
+
+g06:
+  grain: b
+  fact_type: periodic_snapshot
+  measures: {saldo_piutang: semi_additive, pembayaran_bulan_ini: additive, umur_piutang_rata_hari: non_additive}
+  dimensions: [bulan, distributor]
+  dims_wajib: [bulan, distributor]
+  dims_dilarang: [tanggal, produk]
+  alasan: >
+    Saldo adalah ukuran posisi (stock), semi-additive: boleh dijumlah antar distributor, tidak
+    antar bulan. Pembayaran dalam bulan adalah arus (flow), additive. Rata-rata umur tidak boleh
+    dijumlah; simpan komponennya (misalnya total hari x nilai) kalau perlu diagregasi ulang.
+
+g07:
+  grain: a
+  fact_type: transaction
+  measures: {return_qty: additive, refund_amount: additive, return_rate_pct: non_additive}
+  dimensions: [tanggal, produk, distributor, alasan_retur]
+  dims_wajib: [tanggal, produk, distributor, alasan_retur]
+  dims_dilarang: [bulan]
+  alasan: >
+    Setiap item retur adalah kejadian bisnis, jadi transaction fact di grain item retur.
+    Rasio retur adalah turunan (retur / penjualan) dan sebaiknya dihitung di layer semantik,
+    bukan disimpan sebagai measure yang bisa terjumlah.
+
+g08:
+  scd: {region_id: 2, nomor_telepon: 1, segmen_distributor: 3, tanggal_onboarding: 0}
+  alasan: >
+    Type 2 untuk atribut yang harus akurat secara historis. Type 1 untuk koreksi. Type 3 untuk
+    kebutuhan "sebelum vs sesudah" yang terbatas satu perubahan. Type 0 untuk atribut yang
+    nilainya tetap sejak awal.

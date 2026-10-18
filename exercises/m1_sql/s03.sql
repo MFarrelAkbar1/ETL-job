@@ -1,0 +1,22 @@
+-- ==========================================================================
+-- S03 | LEFT JOIN dan COUNT yang benar
+-- Tingkat: MUDAH | Prioritas: -
+-- ==========================================================================
+-- SOAL
+--   Tampilkan SEMUA region (termasuk yang belum punya distributor) beserta jumlah
+--   distributornya dan jumlah distributor yang aktif. Region tanpa distributor harus bernilai 0,
+--   bukan 1 dan bukan NULL.
+--
+-- Tabel        : regions, distributors
+-- Kolom output : region_id, region_name, n_distributors, n_active
+-- Urutan baris : region_id ASC
+--
+-- Definisi revenue standar: SUM(order_items_clean.line_amount) untuk order
+-- di orders_clean dengan status = 'COMPLETED'.
+--
+-- Uji jawaban  : task test-sql -- -k s03
+-- Petunjuk     : task hint -- s03   (3 level, dibuka bertahap)
+-- ==========================================================================
+
+-- Tulis jawaban Anda DI BAWAH baris ini
+
